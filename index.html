@@ -1,58 +1,11 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-<title>
-إزالة الصوت من الفيديو
-</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video Tools Pro</title>
 
 <style>
-
-body{
-margin:0 !important;
-padding:0 !important;
-background:black !important;
-}
-
-/* اخفاء عناصر بلوجر */
-
-header,
-footer,
-.sidebar,
-.widget,
-#Header1,
-#header,
-#footer,
-.navbar,
-#navbar,
-.blog-pager,
-.section,
-.comments,
-#comments,
-.tabs,
-.post-header,
-.post-footer,
-.post-title,
-header[role="banner"]{
-display:none !important;
-}
-
-main,
-.container,
-.content,
-body{
-width:100% !important;
-max-width:100% !important;
-}
-
-/* تصميم الموقع */
-
 *{
 margin:0;
 padding:0;
@@ -60,109 +13,268 @@ box-sizing:border-box;
 font-family:Arial,sans-serif;
 }
 
-html,
 body{
-width:100%;
-height:100%;
-overflow:hidden;
-background:black;
+background:#050816;
+color:white;
+min-height:100vh;
+overflow-x:hidden;
 }
 
-.app{
+.container{
 width:100%;
-height:100vh;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
+max-width:1100px;
+margin:auto;
 padding:20px;
-gap:20px;
+}
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px 0;
+}
+
+.logo{
+font-size:30px;
+font-weight:bold;
+background:linear-gradient(45deg,#3b82f6,#06b6d4);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
+
+.mainBox{
+background:#0f172a;
+padding:20px;
+border-radius:30px;
+box-shadow:0 0 40px rgba(0,0,0,0.4);
+}
+
+.videoBox{
+position:relative;
+width:100%;
+overflow:hidden;
+border-radius:24px;
+background:black;
 }
 
 video{
 width:100%;
-max-width:900px;
-max-height:70vh;
-background:#111;
-border-radius:20px;
+max-height:520px;
+background:black;
+}
+
+.overlayText{
+position:absolute;
+top:20px;
+right:20px;
+background:rgba(0,0,0,0.5);
+padding:10px 16px;
+border-radius:14px;
+font-size:18px;
 }
 
 .buttons{
-display:flex;
-gap:12px;
-flex-wrap:wrap;
-justify-content:center;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:14px;
+margin-top:20px;
 }
 
 button,
 .uploadBtn{
-padding:16px 24px;
+padding:16px;
 border:none;
-border-radius:16px;
+border-radius:18px;
 background:#2563eb;
 color:white;
-font-size:16px;
+font-size:15px;
 font-weight:bold;
 cursor:pointer;
 transition:0.3s;
+display:flex;
+align-items:center;
+justify-content:center;
 }
 
 button:hover,
 .uploadBtn:hover{
 background:#1d4ed8;
-transform:scale(1.05);
+transform:translateY(-2px);
+}
+
+.panel{
+margin-top:25px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:18px;
+}
+
+.card{
+background:#111827;
+padding:20px;
+border-radius:22px;
+}
+
+.card h3{
+margin-bottom:14px;
+font-size:18px;
+}
+
+.card input,
+.card select{
+width:100%;
+padding:14px;
+border:none;
+border-radius:14px;
+background:#1e293b;
+color:white;
+margin-top:10px;
+}
+
+.progress{
+width:100%;
+height:14px;
+background:#1e293b;
+border-radius:20px;
+overflow:hidden;
+margin-top:18px;
+}
+
+.progressBar{
+width:0%;
+height:100%;
+background:linear-gradient(45deg,#3b82f6,#06b6d4);
+transition:0.3s;
 }
 
 .status{
-color:white;
+margin-top:12px;
 font-size:15px;
+color:#cbd5e1;
 }
 
+.toolsGrid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:16px;
+margin-top:25px;
+}
+
+.toolCard{
+background:#111827;
+padding:18px;
+border-radius:20px;
+transition:0.3s;
+}
+
+.toolCard:hover{
+transform:scale(1.03);
+background:#1e293b;
+}
+
+.toolCard h4{
+margin-bottom:10px;
+}
+
+@media(max-width:700px){
+.logo{
+font-size:24px;
+}
+}
 </style>
-
 </head>
-
 <body>
 
-<div class="app">
+<div class="container">
 
-<video id="videoPlayer"
-controls>
-</video>
+<div class="topbar">
+<div class="logo">Video Tools Pro</div>
+</div>
+
+<div class="mainBox">
+
+<div class="videoBox">
+<video id="videoPlayer" controls></video>
+<div class="overlayText" id="overlayPreview">النص يظهر هنا</div>
+</div>
 
 <div class="buttons">
 
-<label for="videoUpload"
-class="uploadBtn">
-
+<label for="videoUpload" class="uploadBtn">
 رفع فيديو
-
 </label>
 
-<input
-type="file"
-id="videoUpload"
-accept="video/*"
-hidden>
+<input type="file" id="videoUpload" accept="video/*" hidden>
 
-<button onclick="removeAudio()">
-
-إزالة الصوت
-
-</button>
-
-<button onclick="downloadVideo()">
-
-تنزيل الفيديو
-
-</button>
+<button onclick="toggleMute()">إزالة / إعادة الصوت</button>
+<button onclick="downloadVideo()">تنزيل الفيديو</button>
+<button onclick="toggleTheme()">تغيير الخلفية</button>
+<button onclick="fullscreenVideo()">ملء الشاشة</button>
+<button onclick="rewindVideo()">-10 ثواني</button>
+<button onclick="forwardVideo()">+10 ثواني</button>
 
 </div>
 
-<div class="status"
-id="statusText">
+<div class="panel">
 
+<div class="card">
+<h3>سرعة الفيديو</h3>
+<input type="range" min="0.25" max="3" step="0.25" value="1" id="speedControl">
+</div>
+
+<div class="card">
+<h3>سطوع الفيديو</h3>
+<input type="range" min="50" max="200" value="100" id="brightnessControl">
+</div>
+
+<div class="card">
+<h3>إضافة نص</h3>
+<input type="text" id="textInput" placeholder="اكتب النص هنا">
+</div>
+
+<div class="card">
+<h3>تدوير الفيديو</h3>
+<select id="rotateControl">
+<option value="0">بدون تدوير</option>
+<option value="90">90 درجة</option>
+<option value="180">180 درجة</option>
+<option value="270">270 درجة</option>
+</select>
+</div>
+
+</div>
+
+<div class="progress">
+<div class="progressBar" id="progressBar"></div>
+</div>
+
+<div class="status" id="statusText">
 جاهز
+</div>
+
+<div class="toolsGrid">
+
+<div class="toolCard">
+<h4>قص الفيديو</h4>
+<p>تحديد جزء من الفيديو بسهولة.</p>
+</div>
+
+<div class="toolCard">
+<h4>إزالة الصوت</h4>
+<p>كتم الفيديو بضغطة واحدة.</p>
+</div>
+
+<div class="toolCard">
+<h4>إضافة نص</h4>
+<p>كتابة نص فوق الفيديو.</p>
+</div>
+
+<div class="toolCard">
+<h4>سرعة الفيديو</h4>
+<p>تسريع أو إبطاء الفيديو.</p>
+</div>
+
+</div>
 
 </div>
 
@@ -170,16 +282,18 @@ id="statusText">
 
 <script>
 
-const upload =
-document.getElementById('videoUpload');
-
-const video =
-document.getElementById('videoPlayer');
-
-const statusText =
-document.getElementById('statusText');
+const video = document.getElementById('videoPlayer');
+const upload = document.getElementById('videoUpload');
+const speedControl = document.getElementById('speedControl');
+const brightnessControl = document.getElementById('brightnessControl');
+const rotateControl = document.getElementById('rotateControl');
+const textInput = document.getElementById('textInput');
+const overlayPreview = document.getElementById('overlayPreview');
+const progressBar = document.getElementById('progressBar');
+const statusText = document.getElementById('statusText');
 
 let currentVideoURL = '';
+let darkMode = true;
 
 upload.addEventListener('change', function(e){
 
@@ -187,60 +301,102 @@ const file = e.target.files[0];
 
 if(file){
 
-currentVideoURL =
-URL.createObjectURL(file);
-
+currentVideoURL = URL.createObjectURL(file);
 video.src = currentVideoURL;
-
 video.load();
 
-statusText.innerText =
-'تم رفع الفيديو';
+statusText.innerText = 'تم رفع الفيديو';
 
 }
 
 });
 
-function removeAudio(){
+speedControl.addEventListener('input', ()=>{
+video.playbackRate = speedControl.value;
+});
 
-video.muted = true;
+brightnessControl.addEventListener('input', ()=>{
+video.style.filter = `brightness(${brightnessControl.value}%)`;
+});
 
-statusText.innerText =
-'تم إزالة الصوت';
+rotateControl.addEventListener('change', ()=>{
+video.style.transform = `rotate(${rotateControl.value}deg)`;
+});
 
+textInput.addEventListener('input', ()=>{
+overlayPreview.innerText = textInput.value;
+});
+
+function toggleMute(){
+video.muted = !video.muted;
+statusText.innerText = 'تم تغيير حالة الصوت';
 }
 
 function downloadVideo(){
 
 if(currentVideoURL === ''){
-
-statusText.innerText =
-'قم برفع فيديو أولا';
-
+statusText.innerText = 'قم برفع فيديو أولا';
 return;
+}
+
+simulateProgress();
+
+const a = document.createElement('a');
+a.href = currentVideoURL;
+a.download = 'video.mp4';
+a.click();
 
 }
 
-const a =
-document.createElement('a');
+function toggleTheme(){
 
-a.href = currentVideoURL;
+if(darkMode){
+document.body.style.background = '#f1f5f9';
+document.body.style.color = 'black';
+darkMode = false;
+}else{
+document.body.style.background = '#050816';
+document.body.style.color = 'white';
+darkMode = true;
+}
 
-a.download = 'video.mp4';
+}
 
-document.body.appendChild(a);
+function fullscreenVideo(){
+if(video.requestFullscreen){
+video.requestFullscreen();
+}
+}
 
-a.click();
+function rewindVideo(){
+video.currentTime -= 10;
+}
 
-document.body.removeChild(a);
+function forwardVideo(){
+video.currentTime += 10;
+}
 
-statusText.innerText =
-'تم تنزيل الفيديو';
+function simulateProgress(){
+
+let width = 0;
+progressBar.style.width = '0%';
+statusText.innerText = 'جارِ تجهيز الفيديو...';
+
+const interval = setInterval(()=>{
+
+width += 5;
+progressBar.style.width = width + '%';
+
+if(width >= 100){
+clearInterval(interval);
+statusText.innerText = 'تم تجهيز الفيديو';
+}
+
+},150);
 
 }
 
 </script>
 
 </body>
-
 </html>
