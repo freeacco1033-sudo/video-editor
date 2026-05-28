@@ -2,900 +2,632 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>VideoForge — محرر الفيديو</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0a0f;
-    --surface: #111118;
-    --surface2: #1a1a26;
-    --surface3: #22223a;
-    --accent: #7c3aed;
-    --accent2: #a855f7;
-    --accent3: #c084fc;
-    --neon: #00f5ff;
-    --neon2: #0ea5e9;
-    --warn: #f59e0b;
-    --danger: #ef4444;
-    --success: #10b981;
-    --text: #e2e8f0;
-    --text2: #94a3b8;
-    --text3: #475569;
-    --border: rgba(124,58,237,0.25);
-    --border2: rgba(255,255,255,0.07);
-    --glow: 0 0 20px rgba(124,58,237,0.4);
-    --glow2: 0 0 40px rgba(124,58,237,0.2);
-    --radius: 12px;
-    --radius2: 8px;
+:root {
+  --bg: #0a0a0f;
+  --surface: #111118;
+  --surface2: #1a1a26;
+  --surface3: #22223a;
+  --accent: #7c3aed;
+  --accent2: #a855f7;
+  --accent3: #c084fc;
+  --neon: #00f5ff;
+  --neon2: #0ea5e9;
+  --warn: #f59e0b;
+  --success: #10b981;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #475569;
+  --border: rgba(124,58,237,0.25);
+  --border2: rgba(255,255,255,0.07);
+  --glow: 0 0 20px rgba(124,58,237,0.4);
+  --radius: 12px;
+  --radius2: 8px;
+  --header-h: 56px;
+  --panel-w: 260px;
+}
+
+/* ── RESET ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { height:100%; }
+
+body {
+  font-family: 'Cairo', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100%;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 20%, rgba(124,58,237,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 80% 80%, rgba(0,245,255,0.05) 0%, transparent 60%);
+  pointer-events:none; z-index:0;
+}
+
+/* ── HEADER ── */
+header {
+  position: sticky; top:0; z-index:200;
+  background: rgba(10,10,15,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  height: var(--header-h);
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.logo {
+  font-family:'Rajdhani',sans-serif;
+  font-size:20px; font-weight:700;
+  color:white; display:flex; align-items:center; gap:8px;
+}
+.logo span { color:var(--accent2); text-shadow:0 0 15px rgba(168,85,247,0.6); }
+.logo-icon {
+  width:32px; height:32px;
+  background:linear-gradient(135deg,var(--accent),var(--neon2));
+  border-radius:8px; display:flex; align-items:center; justify-content:center;
+  font-size:14px; box-shadow:var(--glow); flex-shrink:0;
+}
+
+.header-right { display:flex; align-items:center; gap:8px; }
+
+.badge {
+  background:linear-gradient(135deg,rgba(124,58,237,0.3),rgba(0,245,255,0.15));
+  border:1px solid rgba(124,58,237,0.4);
+  padding:3px 10px; border-radius:20px;
+  font-size:11px; font-weight:600; color:var(--accent3);
+}
+
+#file-name-display {
+  font-size:12px; color:var(--text2);
+  max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+/* ── MAIN WRAPPER ── */
+#app { position:relative; z-index:1; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   UPLOAD SCREEN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#upload-screen {
+  min-height: calc(100vh - var(--header-h));
+  display:flex; align-items:center; justify-content:center;
+  padding:20px;
+}
+
+/* The real file input — absolutely invisible but covers the whole drop zone */
+#file-input {
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  opacity:0; cursor:pointer;
+  z-index:10;
+}
+
+.drop-zone {
+  position:relative;
+  border:2px dashed rgba(124,58,237,0.4);
+  border-radius:24px;
+  background:rgba(124,58,237,0.04);
+  padding:60px 40px;
+  text-align:center;
+  width:100%; max-width:600px;
+  transition:all 0.3s ease;
+  overflow:hidden;
+}
+
+.drop-zone.drag-over {
+  border-color:var(--accent2);
+  background:rgba(124,58,237,0.1);
+  box-shadow:0 0 50px rgba(124,58,237,0.2);
+}
+
+.upload-icon {
+  width:90px; height:90px;
+  background:linear-gradient(135deg,rgba(124,58,237,0.25),rgba(0,245,255,0.12));
+  border:2px solid rgba(124,58,237,0.35);
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  margin:0 auto 22px; font-size:36px;
+  animation:pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(124,58,237,0.3);}
+  50%{transform:scale(1.05);box-shadow:0 0 0 14px rgba(124,58,237,0);}
+}
+
+.drop-zone h2 { font-size:24px; font-weight:800; margin-bottom:8px; }
+.drop-zone p  { color:var(--text2); font-size:14px; margin-bottom:28px; line-height:1.7; }
+
+/* Fake button — purely visual, the real input is on top */
+.upload-btn-fake {
+  display:inline-flex; align-items:center; gap:8px;
+  background:linear-gradient(135deg,var(--accent),var(--neon2));
+  color:white; padding:13px 36px;
+  border-radius:12px; font-family:'Cairo',sans-serif;
+  font-size:16px; font-weight:700;
+  box-shadow:0 4px 24px rgba(124,58,237,0.45);
+  pointer-events:none; /* input on top handles clicks */
+  transition:all 0.3s;
+}
+
+.drop-zone:hover .upload-btn-fake,
+.drop-zone.drag-over .upload-btn-fake {
+  transform:translateY(-2px);
+  box-shadow:0 8px 32px rgba(124,58,237,0.55);
+}
+
+.supported-formats {
+  margin-top:18px; font-size:12px; color:var(--text3);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   EDITOR SCREEN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#editor-screen { display:none; }
+
+/* ── DESKTOP: 3-column grid ── */
+.editor-grid {
+  display:grid;
+  grid-template-columns: var(--panel-w) 1fr var(--panel-w);
+  height: calc(100vh - var(--header-h) - 64px); /* 64px = download bar */
+  overflow:hidden;
+}
+
+/* ── PANELS ── */
+.panel {
+  background:var(--surface);
+  overflow-y:auto;
+  display:flex; flex-direction:column;
+}
+
+.panel-left  { border-left:1px solid var(--border2); }
+.panel-right { border-right:1px solid var(--border2); }
+
+.panel-section { border-bottom:1px solid var(--border2); padding:14px; }
+
+.panel-title {
+  font-size:10px; font-weight:800; color:var(--accent3);
+  text-transform:uppercase; letter-spacing:1.5px;
+  margin-bottom:12px;
+  display:flex; align-items:center; gap:8px;
+}
+.panel-title::after {
+  content:''; flex:1; height:1px;
+  background:linear-gradient(90deg,rgba(124,58,237,0.3),transparent);
+}
+
+/* ── CENTER ── */
+.panel-center {
+  background:#050508;
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+
+.video-area {
+  flex:1; display:flex; align-items:center; justify-content:center;
+  padding:16px; overflow:hidden;
+}
+
+.video-wrapper {
+  position:relative; border-radius:10px; overflow:hidden;
+  box-shadow:0 16px 50px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05);
+  max-width:100%; max-height:100%;
+}
+
+video {
+  display:block; max-width:100%;
+  max-height:calc(100vh - var(--header-h) - 230px);
+  background:#000; border-radius:10px;
+}
+
+.text-overlay {
+  position:absolute; padding:5px 12px; border-radius:6px;
+  font-family:'Cairo',sans-serif; font-weight:700;
+  cursor:move; user-select:none; z-index:10;
+  top:16px; left:50%; transform:translateX(-50%);
+  white-space:nowrap; display:none;
+}
+
+/* ── CONTROLS BAR ── */
+.controls-bar {
+  background:var(--surface);
+  border-top:1px solid var(--border2);
+  padding:12px 16px;
+  flex-shrink:0;
+}
+
+.timeline-wrap { position:relative; margin-bottom:10px; }
+
+#timeline {
+  width:100%; -webkit-appearance:none;
+  height:6px; background:var(--surface3);
+  border-radius:3px; outline:none; cursor:pointer;
+}
+#timeline::-webkit-slider-thumb {
+  -webkit-appearance:none; width:18px; height:18px;
+  background:white; border-radius:50%; cursor:pointer;
+  box-shadow:0 0 10px rgba(124,58,237,0.8);
+  border:2px solid var(--accent2);
+}
+
+.trim-range {
+  position:absolute; top:0; height:6px;
+  background:linear-gradient(90deg,var(--accent),var(--neon2));
+  border-radius:3px; pointer-events:none; opacity:0.6;
+}
+
+.time-display {
+  display:flex; justify-content:space-between;
+  font-family:'Rajdhani',sans-serif; font-size:12px; color:var(--text2);
+  margin-top:4px;
+}
+
+.playback-row {
+  display:flex; align-items:center; justify-content:center;
+  gap:10px; margin-top:10px; flex-wrap:wrap;
+}
+
+.play-btn {
+  width:46px; height:46px;
+  background:linear-gradient(135deg,var(--accent),var(--neon2));
+  border:none; border-radius:50%; color:white; font-size:18px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 18px rgba(124,58,237,0.5); flex-shrink:0;
+  transition:all 0.2s;
+}
+.play-btn:hover { transform:scale(1.08); }
+
+.ctrl-btn {
+  width:36px; height:36px;
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:8px; color:var(--text2); font-size:15px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s; flex-shrink:0;
+}
+.ctrl-btn:hover { background:var(--surface3); color:var(--text); }
+
+.speed-selector {
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:8px; color:var(--text);
+  font-family:'Cairo',sans-serif; font-size:13px;
+  padding:6px 10px; cursor:pointer; outline:none;
+}
+
+/* ── DOWNLOAD BAR ── */
+.download-bar {
+  background:var(--surface);
+  border-top:1px solid var(--border2);
+  padding:12px 16px;
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  min-height:64px; flex-shrink:0;
+}
+
+.video-info { font-size:11px; color:var(--text3); line-height:1.7; }
+.video-info span { color:var(--text2); }
+
+select.fmt-sel, select.qual-sel {
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:8px; color:var(--text);
+  font-family:'Cairo',sans-serif; font-size:13px;
+  padding:7px 10px; cursor:pointer; outline:none;
+}
+
+.download-btn {
+  background:linear-gradient(135deg,var(--success),#059669);
+  border:none; color:white; padding:10px 24px;
+  border-radius:10px; font-family:'Cairo',sans-serif;
+  font-size:15px; font-weight:700; cursor:pointer;
+  display:flex; align-items:center; gap:8px;
+  box-shadow:0 4px 18px rgba(16,185,129,0.35);
+  transition:all 0.3s; margin-right:auto;
+}
+.download-btn:hover { transform:translateY(-2px); box-shadow:0 8px 26px rgba(16,185,129,0.5); }
+
+/* ── CONTROLS inside panels ── */
+.control-group { margin-bottom:12px; }
+
+.control-label {
+  font-size:12px; color:var(--text2);
+  margin-bottom:5px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.control-value {
+  font-family:'Rajdhani',sans-serif; font-size:13px;
+  color:var(--accent3); font-weight:600;
+}
+
+input[type="range"] {
+  width:100%; -webkit-appearance:none;
+  height:4px; background:var(--surface3);
+  border-radius:2px; outline:none; cursor:pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance:none; width:15px; height:15px;
+  background:linear-gradient(135deg,var(--accent),var(--neon2));
+  border-radius:50%; cursor:pointer;
+  box-shadow:0 0 6px rgba(124,58,237,0.6);
+}
+
+.time-inputs { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.time-input-wrap { display:flex; flex-direction:column; gap:4px; }
+.time-input-wrap label { font-size:11px; color:var(--text3); }
+
+.time-input {
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:var(--radius2); color:var(--text);
+  font-family:'Rajdhani',sans-serif; font-size:14px; font-weight:600;
+  padding:7px 10px; width:100%; outline:none;
+  transition:border-color 0.2s; text-align:center;
+}
+.time-input:focus { border-color:var(--accent); }
+
+.toggle-row { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px; }
+
+.toggle-btn {
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:var(--radius2); color:var(--text2);
+  font-family:'Cairo',sans-serif; font-size:12px;
+  padding:8px 4px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:4px;
+  transition:all 0.2s;
+}
+.toggle-btn:hover { background:var(--surface3); color:var(--text); }
+.toggle-btn.active {
+  background:rgba(124,58,237,0.2); border-color:var(--accent);
+  color:var(--accent3); box-shadow:0 0 10px rgba(124,58,237,0.2);
+}
+
+.rotate-btns { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+
+.icon-btn {
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:var(--radius2); color:var(--text2);
+  font-size:16px; padding:9px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s;
+}
+.icon-btn:hover { background:rgba(124,58,237,0.15); border-color:var(--accent); color:var(--accent3); }
+
+.filter-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+
+.filter-item {
+  background:var(--surface2); border:2px solid var(--border2);
+  border-radius:var(--radius2); padding:9px 6px;
+  text-align:center; cursor:pointer; transition:all 0.2s;
+  font-size:11px; color:var(--text2);
+}
+.filter-item:hover { border-color:rgba(124,58,237,0.4); color:var(--text); }
+.filter-item.active { border-color:var(--accent); background:rgba(124,58,237,0.15); color:var(--accent3); }
+.filter-icon { font-size:16px; margin-bottom:4px; }
+
+.text-input {
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:var(--radius2); color:var(--text);
+  font-family:'Cairo',sans-serif; font-size:13px;
+  padding:8px 10px; width:100%; outline:none;
+  transition:border-color 0.2s; resize:none;
+}
+.text-input:focus { border-color:var(--accent); }
+
+.color-row {
+  display:flex; align-items:center; gap:8px; margin-bottom:8px;
+}
+.color-row label { font-size:12px; color:var(--text2); flex-shrink:0; }
+
+input[type="color"] {
+  width:34px; height:34px; border:2px solid var(--border2);
+  border-radius:8px; background:none; cursor:pointer; padding:2px; flex-shrink:0;
+}
+
+.stat-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
+.stat-chip {
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:6px; padding:3px 9px;
+  font-size:11px; font-family:'Rajdhani',sans-serif; font-weight:600;
+  color:var(--text2); display:flex; align-items:center; gap:4px;
+}
+.stat-chip .dot { width:6px; height:6px; border-radius:50%; background:var(--accent2); }
+
+.notice {
+  background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25);
+  border-radius:var(--radius2); padding:8px 10px;
+  font-size:11px; color:var(--warn); line-height:1.6; margin-top:8px;
+}
+
+/* ── MOBILE TABS ── */
+.mobile-tabs {
+  display:none;
+  background:var(--surface);
+  border-bottom:1px solid var(--border2);
+  overflow-x:auto; -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  position:sticky; top:var(--header-h); z-index:150;
+}
+.mobile-tabs::-webkit-scrollbar { display:none; }
+.mobile-tabs-inner {
+  display:flex; min-width:max-content; padding:0 8px;
+}
+.mtab {
+  padding:11px 16px; border:none; background:transparent;
+  color:var(--text2); font-family:'Cairo',sans-serif;
+  font-size:13px; cursor:pointer; white-space:nowrap;
+  border-bottom:2px solid transparent; transition:all 0.2s;
+}
+.mtab.active { color:var(--accent3); border-bottom-color:var(--accent2); }
+
+/* Panels in mobile become tab content */
+.mobile-panel {
+  display:none;
+  overflow-y:auto;
+  max-height:55vh;
+  background:var(--surface);
+  border-bottom:1px solid var(--border2);
+}
+.mobile-panel.active { display:block; }
+
+/* ── EXPORT PROGRESS ── */
+.export-overlay {
+  position:fixed; inset:0; z-index:500;
+  background:rgba(0,0,0,0.85); backdrop-filter:blur(10px);
+  display:none; align-items:center; justify-content:center;
+}
+.export-overlay.visible { display:flex; }
+
+.export-box {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:20px; padding:40px 48px;
+  text-align:center; min-width:300px;
+  box-shadow:0 0 60px rgba(124,58,237,0.25);
+}
+
+.spinner {
+  width:56px; height:56px;
+  border:3px solid var(--surface3); border-top-color:var(--accent2);
+  border-radius:50%; animation:spin 0.8s linear infinite;
+  margin:0 auto 18px;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+.progress-bar-wrap {
+  background:var(--surface2); border-radius:10px;
+  height:8px; overflow:hidden; margin-top:14px;
+}
+.progress-bar {
+  height:100%;
+  background:linear-gradient(90deg,var(--accent),var(--neon));
+  border-radius:10px; transition:width 0.3s; width:0%;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--surface3); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:rgba(124,58,237,0.4); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RESPONSIVE BREAKPOINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Tablet: hide side panels, show tab bar */
+@media (max-width: 900px) {
+  :root { --panel-w: 0px; }
+
+  .editor-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    height: auto;
+    overflow: visible;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .panel-left, .panel-right { display:none !important; }
 
-  body {
-    font-family: 'Cairo', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Animated background */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: 
-      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(124,58,237,0.08) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 30% at 80% 80%, rgba(0,245,255,0.05) 0%, transparent 60%),
-      radial-gradient(ellipse 30% 50% at 50% 50%, rgba(168,85,247,0.04) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* ─── HEADER ─── */
-  header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(10,10,15,0.85);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .logo {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .logo span {
-    color: var(--accent2);
-    text-shadow: 0 0 15px rgba(168,85,247,0.6);
-  }
-
-  .logo-icon {
-    width: 32px; height: 32px;
-    background: linear-gradient(135deg, var(--accent), var(--neon2));
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
-    box-shadow: var(--glow);
-  }
-
-  .header-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 13px;
-    color: var(--text2);
-  }
-
-  .badge {
-    background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(0,245,255,0.15));
-    border: 1px solid rgba(124,58,237,0.4);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--accent3);
-    letter-spacing: 0.5px;
-  }
-
-  /* ─── LAYOUT ─── */
-  .app-layout {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-template-columns: 280px 1fr 260px;
-    grid-template-rows: auto 1fr auto;
-    height: calc(100vh - 60px);
-    overflow: hidden;
-  }
-
-  /* ─── UPLOAD ZONE ─── */
-  .upload-section {
-    grid-column: 1 / -1;
-    padding: 20px;
-    display: none;
-  }
-
-  .upload-section.visible { display: block; }
-
-  .drop-zone {
-    border: 2px dashed rgba(124,58,237,0.4);
-    border-radius: 20px;
-    background: rgba(124,58,237,0.04);
-    padding: 60px 40px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .drop-zone::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 50% 60% at 50% 50%, rgba(124,58,237,0.06) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-
-  .drop-zone:hover, .drop-zone.drag-over {
-    border-color: var(--accent2);
-    background: rgba(124,58,237,0.08);
-    box-shadow: 0 0 40px rgba(124,58,237,0.15), inset 0 0 40px rgba(124,58,237,0.05);
-  }
-
-  .drop-zone:hover::before, .drop-zone.drag-over::before { opacity: 1; }
-
-  .upload-icon {
-    width: 80px; height: 80px;
-    background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(0,245,255,0.1));
-    border: 2px solid rgba(124,58,237,0.3);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 20px;
-    font-size: 32px;
-    animation: pulse 2.5s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(124,58,237,0.3); }
-    50% { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(124,58,237,0); }
-  }
-
-  .drop-zone h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-  .drop-zone p { color: var(--text2); font-size: 14px; margin-bottom: 24px; }
-
-  .upload-btn {
-    background: linear-gradient(135deg, var(--accent), var(--neon2));
-    border: none;
-    color: white;
-    padding: 12px 32px;
-    border-radius: 10px;
-    font-family: 'Cairo', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 20px rgba(124,58,237,0.4);
-  }
-
-  .upload-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(124,58,237,0.5);
-  }
-
-  .supported-formats {
-    margin-top: 16px;
-    font-size: 12px;
-    color: var(--text3);
-  }
-
-  /* ─── EDITOR LAYOUT ─── */
-  .editor-wrapper {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: 260px 1fr 270px;
-    height: 100%;
-    overflow: hidden;
-  }
-
-  /* ─── LEFT PANEL ─── */
-  .panel-left {
-    background: var(--surface);
-    border-left: 1px solid var(--border2);
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .panel-section {
-    border-bottom: 1px solid var(--border2);
-    padding: 16px;
-  }
-
-  .panel-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--accent3);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .panel-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, rgba(124,58,237,0.3), transparent);
-  }
-
-  /* Controls */
-  .control-group { margin-bottom: 14px; }
-
-  .control-label {
-    font-size: 12px;
-    color: var(--text2);
-    margin-bottom: 6px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .control-value {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 13px;
-    color: var(--accent3);
-    font-weight: 600;
-  }
-
-  input[type="range"] {
-    width: 100%;
-    -webkit-appearance: none;
-    height: 4px;
-    background: var(--surface3);
-    border-radius: 2px;
-    outline: none;
-    cursor: pointer;
-  }
-
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 16px; height: 16px;
-    background: linear-gradient(135deg, var(--accent), var(--neon2));
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 0 8px rgba(124,58,237,0.6);
-    transition: transform 0.2s;
-  }
-
-  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
-
-  .time-inputs {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-
-  .time-input-wrap { display: flex; flex-direction: column; gap: 4px; }
-  .time-input-wrap label { font-size: 11px; color: var(--text3); }
-
-  .time-input {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius2);
-    color: var(--text);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 8px 10px;
-    width: 100%;
-    outline: none;
-    transition: border-color 0.2s;
-    text-align: center;
-  }
-
-  .time-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(124,58,237,0.15); }
-
-  /* Toggle buttons */
-  .toggle-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    margin-bottom: 8px;
-  }
-
-  .toggle-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius2);
-    color: var(--text2);
-    font-family: 'Cairo', sans-serif;
-    font-size: 12px;
-    padding: 8px 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-  }
-
-  .toggle-btn:hover { background: var(--surface3); color: var(--text); }
-  .toggle-btn.active {
-    background: rgba(124,58,237,0.2);
-    border-color: var(--accent);
-    color: var(--accent3);
-    box-shadow: 0 0 10px rgba(124,58,237,0.2);
-  }
-
-  /* Rotate buttons */
-  .rotate-btns {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-  }
-
-  .icon-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius2);
-    color: var(--text2);
-    font-size: 16px;
-    padding: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .icon-btn:hover {
-    background: rgba(124,58,237,0.15);
-    border-color: var(--accent);
-    color: var(--accent3);
-  }
-
-  /* ─── CENTER ─── */
   .panel-center {
-    background: #070709;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  /* Video container */
-  .video-container {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .video-wrapper {
-    position: relative;
-    max-width: 100%;
-    max-height: 100%;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05);
+    height: auto;
   }
 
   video {
-    display: block;
-    max-width: 100%;
-    max-height: calc(100vh - 300px);
-    border-radius: 10px;
-    background: #000;
+    max-height: 38vh;
   }
 
-  /* Video overlay effects */
-  .video-overlay {
-    position: absolute;
-    inset: 0;
-    border-radius: 10px;
-    pointer-events: none;
-    transition: all 0.3s;
-  }
+  .mobile-tabs { display:block; }
+  .mobile-panels-container { display:block; }
 
-  /* Filter previews on video */
-  video.filter-grayscale { filter: grayscale(100%); }
-  video.filter-sepia { filter: sepia(80%); }
-  video.filter-invert { filter: invert(100%); }
-  video.filter-blur { filter: blur(2px); }
-  video.filter-saturate { filter: saturate(200%); }
-  video.filter-vintage { filter: sepia(40%) contrast(1.1) brightness(0.95); }
-  video.filter-cool { filter: hue-rotate(30deg) saturate(120%); }
-  video.filter-warm { filter: hue-rotate(-15deg) saturate(130%) brightness(1.05); }
+  /* download bar wraps */
+  .download-bar { flex-direction:column; align-items:stretch; gap:10px; }
+  .download-btn { justify-content:center; margin-right:0; }
 
-  /* ─── CONTROLS BAR ─── */
-  .controls-bar {
-    background: var(--surface);
-    border-top: 1px solid var(--border2);
-    padding: 14px 20px;
-  }
+  .playback-row { gap:6px; }
+}
 
-  /* Timeline */
-  .timeline-wrap {
-    position: relative;
-    margin-bottom: 12px;
-  }
+/* Mobile phone */
+@media (max-width: 480px) {
+  :root { --header-h: 52px; }
 
-  #timeline {
-    width: 100%;
-    -webkit-appearance: none;
-    height: 6px;
-    background: var(--surface3);
-    border-radius: 3px;
-    outline: none;
-    cursor: pointer;
-    position: relative;
-    z-index: 2;
-  }
+  header { padding:0 12px; }
 
-  #timeline::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 18px; height: 18px;
-    background: white;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 0 10px rgba(124,58,237,0.8), 0 2px 6px rgba(0,0,0,0.4);
-    border: 2px solid var(--accent2);
-  }
+  #file-name-display { display:none; }
 
-  .trim-range {
-    position: absolute;
-    top: 0;
-    height: 6px;
-    background: linear-gradient(90deg, var(--accent), var(--neon2));
-    border-radius: 3px;
-    pointer-events: none;
-    z-index: 1;
-    opacity: 0.6;
-  }
+  .drop-zone { padding:36px 20px; border-radius:18px; }
+  .drop-zone h2 { font-size:20px; }
+  .drop-zone p  { font-size:13px; }
+  .upload-btn-fake { padding:12px 28px; font-size:15px; }
+  .upload-icon { width:72px; height:72px; font-size:28px; }
 
-  .time-display {
-    display: flex;
-    justify-content: space-between;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 13px;
-    color: var(--text2);
-    margin-top: 4px;
-  }
+  video { max-height:33vh; }
 
-  /* Playback controls */
-  .playback-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-top: 10px;
-  }
+  .ctrl-btn { width:32px; height:32px; font-size:13px; }
+  .play-btn  { width:42px; height:42px; font-size:16px; }
 
-  .play-btn {
-    width: 48px; height: 48px;
-    background: linear-gradient(135deg, var(--accent), var(--neon2));
-    border: none;
-    border-radius: 50%;
-    color: white;
-    font-size: 18px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
-    box-shadow: 0 4px 20px rgba(124,58,237,0.5);
-    flex-shrink: 0;
-  }
+  .panel-section { padding:12px; }
 
-  .play-btn:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(124,58,237,0.6); }
+  .mtab { padding:10px 14px; font-size:12px; }
 
-  .ctrl-btn {
-    width: 36px; height: 36px;
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    color: var(--text2);
-    font-size: 16px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
-  }
-
-  .ctrl-btn:hover { background: var(--surface3); color: var(--text); border-color: rgba(124,58,237,0.3); }
-
-  .speed-selector {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: 'Cairo', sans-serif;
-    font-size: 13px;
-    padding: 6px 10px;
-    cursor: pointer;
-    outline: none;
-  }
-
-  /* ─── RIGHT PANEL ─── */
-  .panel-right {
-    background: var(--surface);
-    border-right: 1px solid var(--border2);
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Color inputs */
-  .color-picker-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  input[type="color"] {
-    width: 36px; height: 36px;
-    border: 2px solid var(--border2);
-    border-radius: 8px;
-    background: none;
-    cursor: pointer;
-    padding: 2px;
-  }
-
-  .color-presets {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-top: 8px;
-  }
-
-  .color-preset {
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: all 0.2s;
-    flex-shrink: 0;
-  }
-
-  .color-preset:hover, .color-preset.active { border-color: white; transform: scale(1.15); }
-
-  /* Text overlay */
-  .text-input {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius2);
-    color: var(--text);
-    font-family: 'Cairo', sans-serif;
-    font-size: 13px;
-    padding: 9px 12px;
-    width: 100%;
-    outline: none;
-    transition: border-color 0.2s;
-    resize: none;
-  }
-
-  .text-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(124,58,237,0.12); }
-
-  /* Filter grid */
-  .filter-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-  }
-
-  .filter-item {
-    background: var(--surface2);
-    border: 2px solid var(--border2);
-    border-radius: var(--radius2);
-    padding: 10px 8px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 12px;
-    color: var(--text2);
-  }
-
-  .filter-item:hover { border-color: rgba(124,58,237,0.4); color: var(--text); }
-  .filter-item.active { border-color: var(--accent); background: rgba(124,58,237,0.15); color: var(--accent3); }
-  .filter-icon { font-size: 18px; margin-bottom: 4px; }
-
-  /* ─── DOWNLOAD SECTION ─── */
-  .download-panel {
-    grid-column: 1 / -1;
-    background: var(--surface);
-    border-top: 1px solid var(--border2);
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
-  .format-select {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius2);
-    color: var(--text);
-    font-family: 'Cairo', sans-serif;
-    font-size: 13px;
-    padding: 8px 14px;
-    outline: none;
-    cursor: pointer;
-  }
-
-  .quality-select {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius2);
-    color: var(--text);
-    font-family: 'Cairo', sans-serif;
-    font-size: 13px;
-    padding: 8px 14px;
-    outline: none;
-    cursor: pointer;
-  }
-
-  .download-btn {
-    background: linear-gradient(135deg, var(--success), #059669);
-    border: none;
-    color: white;
-    padding: 10px 28px;
-    border-radius: 10px;
-    font-family: 'Cairo', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.3s;
-    box-shadow: 0 4px 18px rgba(16,185,129,0.35);
-    margin-right: auto;
-  }
-
-  .download-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 26px rgba(16,185,129,0.5);
-  }
-
-  .download-btn:disabled {
-    background: var(--surface3);
-    color: var(--text3);
-    box-shadow: none;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  .video-info {
-    font-size: 12px;
-    color: var(--text3);
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .video-info span { color: var(--text2); }
-
-  /* ─── PROGRESS ─── */
-  .export-progress {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    backdrop-filter: blur(10px);
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    display: none;
-  }
-
-  .export-progress.visible { display: flex; }
-
-  .progress-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 40px 50px;
-    text-align: center;
-    min-width: 320px;
-    box-shadow: var(--glow2);
-  }
-
-  .progress-spinner {
-    width: 60px; height: 60px;
-    border: 3px solid var(--surface3);
-    border-top-color: var(--accent2);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 20px;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .progress-bar-wrap {
-    background: var(--surface2);
-    border-radius: 10px;
-    height: 8px;
-    overflow: hidden;
-    margin-top: 16px;
-  }
-
-  .progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--neon));
-    border-radius: 10px;
-    transition: width 0.3s;
-    width: 0%;
-  }
-
-  /* ─── SCROLLBAR ─── */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(124,58,237,0.4); }
-
-  /* ─── NOTICE ─── */
-  .notice {
-    background: rgba(245,158,11,0.1);
-    border: 1px solid rgba(245,158,11,0.3);
-    border-radius: var(--radius2);
-    padding: 10px 12px;
-    font-size: 12px;
-    color: var(--warn);
-    margin-top: 10px;
-    line-height: 1.6;
-  }
-
-  /* ─── TEXT OVERLAY ON VIDEO ─── */
-  .text-overlay {
-    position: absolute;
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-family: 'Cairo', sans-serif;
-    font-weight: 700;
-    cursor: move;
-    user-select: none;
-    z-index: 10;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    white-space: nowrap;
-  }
-
-  /* ─── CROP OVERLAY ─── */
-  .crop-overlay {
-    position: absolute;
-    inset: 0;
-    display: none;
-    pointer-events: none;
-    z-index: 5;
-  }
-
-  .crop-overlay.active { display: block; }
-
-  .crop-box {
-    position: absolute;
-    border: 2px solid var(--neon);
-    box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
-    cursor: move;
-    pointer-events: all;
-  }
-
-  /* Flip animation */
-  .flip-h { transform: scaleX(-1); }
-  .flip-v { transform: scaleY(-1); }
-  .flip-hv { transform: scaleX(-1) scaleY(-1); }
-
-  /* ─── MINI WAVEFORM ─── */
-  .waveform-wrap {
-    width: 100%;
-    height: 40px;
-    background: var(--surface2);
-    border-radius: var(--radius2);
-    overflow: hidden;
-    position: relative;
-    margin-top: 8px;
-  }
-
-  canvas#waveform {
-    width: 100%;
-    height: 100%;
-  }
-
-  /* ─── STAT CHIPS ─── */
-  .stat-row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 4px;
-  }
-
-  .stat-chip {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 6px;
-    padding: 4px 10px;
-    font-size: 11px;
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 600;
-    color: var(--text2);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .stat-chip .dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent2);
-  }
-
-  /* ─── RESPONSIVE ─── */
-  @media (max-width: 900px) {
-    .editor-wrapper { grid-template-columns: 1fr; }
-    .panel-left, .panel-right { display: none; }
-  }
+  .export-box { padding:30px 24px; min-width:260px; }
+}
 </style>
 </head>
 <body>
 
+<!-- ═══════════════ HEADER ═══════════════ -->
 <header>
   <div class="logo">
     <div class="logo-icon">🎬</div>
     Video<span>Forge</span>
   </div>
-  <div class="header-info">
-    <div id="file-name-display" style="font-size:13px; color: var(--text2);">لا يوجد فيديو محمّل</div>
+  <div class="header-right">
+    <div id="file-name-display">لا يوجد فيديو</div>
     <div class="badge">محرر الفيديو</div>
   </div>
 </header>
 
-<!-- MAIN APP -->
-<div class="app-layout" id="app">
+<div id="app">
 
-  <!-- UPLOAD ZONE -->
-  <div class="upload-section visible" id="upload-section">
-    <div class="drop-zone" id="drop-zone">
-      <div class="upload-icon">🎬</div>
-      <h2>ارفع فيديوك هنا</h2>
-      <p>اسحب وأفلت الفيديو، أو اضغط للاختيار من الجهاز</p>
-      <button class="upload-btn" onclick="document.getElementById('file-input').click()">
-        📁 اختر فيديو
-      </button>
-      <div class="supported-formats">يدعم: MP4 · WebM · MOV · AVI · MKV · OGG</div>
-      <input type="file" id="file-input" accept="video/*" style="display:none">
+<!-- ═══════════════ UPLOAD SCREEN ═══════════════ -->
+<div id="upload-screen">
+  <div class="drop-zone" id="drop-zone">
+    <!-- REAL input covers the whole drop zone -->
+    <input type="file" id="file-input" accept="video/*" capture="false">
+
+    <div class="upload-icon">🎬</div>
+    <h2>ارفع فيديوك هنا</h2>
+    <p>
+      اضغط على الزر لاختيار فيديو من جهازك<br>
+      أو اسحب وأفلت الفيديو مباشرة
+    </p>
+    <div class="upload-btn-fake">📁 اختر فيديو</div>
+    <div class="supported-formats">يدعم: MP4 · WebM · MOV · AVI · MKV · OGG</div>
+  </div>
+</div>
+
+<!-- ═══════════════ EDITOR SCREEN ═══════════════ -->
+<div id="editor-screen">
+
+  <!-- MOBILE TABS -->
+  <div class="mobile-tabs" id="mobile-tabs">
+    <div class="mobile-tabs-inner">
+      <button class="mtab active" onclick="showTab('cut')">✂️ قص</button>
+      <button class="mtab" onclick="showTab('audio')">🔊 صوت</button>
+      <button class="mtab" onclick="showTab('rotate')">🔄 تدوير</button>
+      <button class="mtab" onclick="showTab('speed')">⚡ سرعة</button>
+      <button class="mtab" onclick="showTab('image')">☀️ صورة</button>
+      <button class="mtab" onclick="showTab('filters')">🎨 فلاتر</button>
+      <button class="mtab" onclick="showTab('text')">📝 نص</button>
     </div>
   </div>
 
-  <!-- EDITOR (hidden until video loaded) -->
-  <div class="editor-wrapper" id="editor-wrapper" style="display:none;">
+  <!-- MOBILE PANELS CONTAINER (shown only on mobile) -->
+  <div class="mobile-panels-container" style="display:none;" id="mobile-panels">
 
-    <!-- LEFT PANEL -->
-    <div class="panel-left">
-
-      <!-- CUT / TRIM -->
+    <div class="mobile-panel active" id="mpanel-cut">
       <div class="panel-section">
         <div class="panel-title">✂️ قص الفيديو</div>
         <div class="time-inputs">
@@ -908,67 +640,182 @@
             <input type="number" class="time-input" id="trim-end" value="0" min="0" step="0.1">
           </div>
         </div>
-        <div class="notice" style="margin-top:10px;">
-          💡 يُطبّق القص عند التصدير. استخدم المشغّل لمعاينة النطاق.
-        </div>
+        <div class="notice">💡 يُطبّق القص عند التصدير.</div>
       </div>
+    </div>
 
-      <!-- AUDIO -->
+    <div class="mobile-panel" id="mpanel-audio">
       <div class="panel-section">
         <div class="panel-title">🔊 الصوت</div>
         <div class="control-group">
-          <div class="control-label">
-            <span>مستوى الصوت</span>
-            <span class="control-value" id="vol-val">100%</span>
+          <div class="control-label"><span>مستوى الصوت</span><span class="control-value" id="vol-val2">100%</span></div>
+          <input type="range" id="volume2" min="0" max="200" value="100">
+        </div>
+        <div class="toggle-row">
+          <button class="toggle-btn" id="mute-btn2" onclick="toggleMute()">🔇 كتم</button>
+          <button class="toggle-btn" id="rev-btn2" onclick="toggleReverseAudio()">🔄 عكس</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-panel" id="mpanel-rotate">
+      <div class="panel-section">
+        <div class="panel-title">🔄 التدوير والقلب</div>
+        <div class="control-group">
+          <div class="control-label"><span>زاوية التدوير</span><span class="control-value" id="rotate-val2">0°</span></div>
+          <input type="range" id="rotate2" min="0" max="360" value="0">
+        </div>
+        <div class="rotate-btns" style="margin-top:8px;">
+          <button class="icon-btn" onclick="setRotate(-90)">↺</button>
+          <button class="icon-btn" onclick="setRotate(90)">↻</button>
+          <button class="icon-btn" onclick="toggleFlip('h')">⇆</button>
+          <button class="icon-btn" onclick="toggleFlip('v')">⇅</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-panel" id="mpanel-speed">
+      <div class="panel-section">
+        <div class="panel-title">⚡ السرعة</div>
+        <div class="control-group">
+          <div class="control-label"><span>سرعة التشغيل</span><span class="control-value" id="speed-val2">1×</span></div>
+          <input type="range" id="speed-range2" min="0.25" max="4" step="0.25" value="1">
+        </div>
+        <div class="toggle-row">
+          <button class="toggle-btn" onclick="setSpeed(0.5)">0.5×</button>
+          <button class="toggle-btn" onclick="setSpeed(1)">1×</button>
+          <button class="toggle-btn" onclick="setSpeed(1.5)">1.5×</button>
+          <button class="toggle-btn" onclick="setSpeed(2)">2×</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-panel" id="mpanel-image">
+      <div class="panel-section">
+        <div class="panel-title">☀️ الصورة</div>
+        <div class="control-group">
+          <div class="control-label"><span>السطوع</span><span class="control-value" id="bright-val2">100%</span></div>
+          <input type="range" id="brightness2" min="0" max="200" value="100">
+        </div>
+        <div class="control-group">
+          <div class="control-label"><span>التباين</span><span class="control-value" id="contrast-val2">100%</span></div>
+          <input type="range" id="contrast2" min="0" max="200" value="100">
+        </div>
+        <div class="control-group">
+          <div class="control-label"><span>التشبع</span><span class="control-value" id="saturate-val2">100%</span></div>
+          <input type="range" id="saturate2" min="0" max="300" value="100">
+        </div>
+        <div class="control-group">
+          <div class="control-label"><span>درجة الألوان</span><span class="control-value" id="hue-val2">0°</span></div>
+          <input type="range" id="hue2" min="0" max="360" value="0">
+        </div>
+        <button class="toggle-btn" style="width:100%;margin-top:4px;" onclick="resetFilters()">🔄 إعادة تعيين</button>
+      </div>
+    </div>
+
+    <div class="mobile-panel" id="mpanel-filters">
+      <div class="panel-section">
+        <div class="panel-title">🎨 فلاتر</div>
+        <div class="filter-grid" id="filter-grid2">
+          <div class="filter-item active" onclick="applyFilter('none',this,'2')"><div class="filter-icon">🎬</div>عادي</div>
+          <div class="filter-item" onclick="applyFilter('grayscale',this,'2')"><div class="filter-icon">⬛</div>أبيض وأسود</div>
+          <div class="filter-item" onclick="applyFilter('sepia',this,'2')"><div class="filter-icon">🟤</div>كلاسيكي</div>
+          <div class="filter-item" onclick="applyFilter('vintage',this,'2')"><div class="filter-icon">📷</div>فينتاج</div>
+          <div class="filter-item" onclick="applyFilter('cool',this,'2')"><div class="filter-icon">🔵</div>بارد</div>
+          <div class="filter-item" onclick="applyFilter('warm',this,'2')"><div class="filter-icon">🟠</div>دافئ</div>
+          <div class="filter-item" onclick="applyFilter('saturate',this,'2')"><div class="filter-icon">🌈</div>حيوي</div>
+          <div class="filter-item" onclick="applyFilter('invert',this,'2')"><div class="filter-icon">🔄</div>عكسي</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-panel" id="mpanel-text">
+      <div class="panel-section">
+        <div class="panel-title">📝 نص على الفيديو</div>
+        <div class="control-group">
+          <textarea class="text-input" id="overlay-text" rows="2" placeholder="اكتب النص هنا..."></textarea>
+        </div>
+        <div class="control-group">
+          <div class="control-label"><span>حجم الخط</span><span class="control-value" id="font-size-val">24px</span></div>
+          <input type="range" id="font-size" min="12" max="72" value="24">
+        </div>
+        <div class="color-row">
+          <label>لون النص</label>
+          <input type="color" id="text-color" value="#ffffff">
+        </div>
+        <div class="color-row">
+          <label>خلفية</label>
+          <input type="color" id="text-bg" value="#000000">
+          <input type="range" id="text-bg-opacity" min="0" max="100" value="50" style="flex:1;">
+        </div>
+        <div class="toggle-row" style="margin-top:8px;">
+          <button class="toggle-btn" onclick="applyTextOverlay()">✅ تطبيق</button>
+          <button class="toggle-btn" onclick="removeTextOverlay()">❌ إزالة</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /mobile-panels -->
+
+  <!-- DESKTOP 3-COLUMN GRID -->
+  <div class="editor-grid" id="editor-grid">
+
+    <!-- LEFT PANEL (desktop only) -->
+    <div class="panel panel-left" id="left-panel">
+
+      <div class="panel-section">
+        <div class="panel-title">✂️ قص الفيديو</div>
+        <div class="time-inputs">
+          <div class="time-input-wrap">
+            <label>من (ثانية)</label>
+            <input type="number" class="time-input" id="trim-start-d" value="0" min="0" step="0.1">
           </div>
+          <div class="time-input-wrap">
+            <label>إلى (ثانية)</label>
+            <input type="number" class="time-input" id="trim-end-d" value="0" min="0" step="0.1">
+          </div>
+        </div>
+        <div class="notice">💡 يُطبّق القص عند التصدير.</div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-title">🔊 الصوت</div>
+        <div class="control-group">
+          <div class="control-label"><span>مستوى الصوت</span><span class="control-value" id="vol-val">100%</span></div>
           <input type="range" id="volume" min="0" max="200" value="100">
         </div>
         <div class="control-group">
-          <div class="control-label">
-            <span>صوت الباس</span>
-            <span class="control-value" id="bass-val">0</span>
-          </div>
+          <div class="control-label"><span>صوت الباس</span><span class="control-value" id="bass-val">0</span></div>
           <input type="range" id="bass" min="-10" max="10" value="0">
         </div>
         <div class="control-group">
-          <div class="control-label">
-            <span>صوت الحدة</span>
-            <span class="control-value" id="treble-val">0</span>
-          </div>
+          <div class="control-label"><span>صوت الحدة</span><span class="control-value" id="treble-val">0</span></div>
           <input type="range" id="treble" min="-10" max="10" value="0">
         </div>
         <div class="toggle-row">
           <button class="toggle-btn" id="mute-btn" onclick="toggleMute()">🔇 كتم</button>
-          <button class="toggle-btn" id="reverse-audio-btn" onclick="toggleReverseAudio()">🔄 عكس الصوت</button>
+          <button class="toggle-btn" id="rev-btn" onclick="toggleReverseAudio()">🔄 عكس الصوت</button>
         </div>
       </div>
 
-      <!-- ROTATION / FLIP -->
       <div class="panel-section">
         <div class="panel-title">🔄 التدوير والقلب</div>
         <div class="control-group">
-          <div class="control-label">
-            <span>زاوية التدوير</span>
-            <span class="control-value" id="rotate-val">0°</span>
-          </div>
+          <div class="control-label"><span>زاوية التدوير</span><span class="control-value" id="rotate-val">0°</span></div>
           <input type="range" id="rotate" min="0" max="360" value="0">
         </div>
         <div class="rotate-btns" style="margin-top:8px;">
-          <button class="icon-btn" title="تدوير 90° يسار" onclick="setRotate(-90)">↺</button>
-          <button class="icon-btn" title="تدوير 90° يمين" onclick="setRotate(90)">↻</button>
-          <button class="icon-btn" title="قلب أفقي" onclick="toggleFlip('h')">⇆</button>
-          <button class="icon-btn" title="قلب عمودي" onclick="toggleFlip('v')">⇅</button>
+          <button class="icon-btn" title="↺ 90° يسار" onclick="setRotate(-90)">↺</button>
+          <button class="icon-btn" title="↻ 90° يمين" onclick="setRotate(90)">↻</button>
+          <button class="icon-btn" title="قلب أفقي"   onclick="toggleFlip('h')">⇆</button>
+          <button class="icon-btn" title="قلب عمودي"  onclick="toggleFlip('v')">⇅</button>
         </div>
       </div>
 
-      <!-- SPEED -->
       <div class="panel-section">
         <div class="panel-title">⚡ السرعة</div>
         <div class="control-group">
-          <div class="control-label">
-            <span>سرعة التشغيل</span>
-            <span class="control-value" id="speed-val">1×</span>
-          </div>
+          <div class="control-label"><span>سرعة التشغيل</span><span class="control-value" id="speed-val">1×</span></div>
           <input type="range" id="speed-range" min="0.25" max="4" step="0.25" value="1">
         </div>
         <div class="toggle-row">
@@ -979,18 +826,17 @@
         </div>
       </div>
 
-    </div>
+    </div><!-- /left panel -->
 
-    <!-- CENTER: VIDEO + CONTROLS -->
+    <!-- CENTER -->
     <div class="panel-center">
-      <div class="video-container">
+      <div class="video-area">
         <div class="video-wrapper" id="video-wrapper">
           <video id="main-video" playsinline></video>
-          <div class="text-overlay" id="text-overlay" style="display:none;"></div>
+          <div class="text-overlay" id="text-overlay"></div>
         </div>
       </div>
 
-      <!-- TIMELINE + CONTROLS -->
       <div class="controls-bar">
         <div class="timeline-wrap">
           <div class="trim-range" id="trim-range"></div>
@@ -1001,11 +847,11 @@
           <span id="duration-display">0:00</span>
         </div>
         <div class="playback-row">
-          <button class="ctrl-btn" title="إلى البداية" onclick="seekTo(0)">⏮</button>
-          <button class="ctrl-btn" title="تراجع 5 ثوان" onclick="seekBy(-5)">⏪</button>
+          <button class="ctrl-btn" onclick="seekTo(0)" title="البداية">⏮</button>
+          <button class="ctrl-btn" onclick="seekBy(-5)" title="-5 ث">⏪</button>
           <button class="play-btn" id="play-btn" onclick="togglePlay()">▶</button>
-          <button class="ctrl-btn" title="تقدم 5 ثوان" onclick="seekBy(5)">⏩</button>
-          <button class="ctrl-btn" title="نهاية" onclick="seekEnd()">⏭</button>
+          <button class="ctrl-btn" onclick="seekBy(5)" title="+5 ث">⏩</button>
+          <button class="ctrl-btn" onclick="seekEnd()" title="النهاية">⏭</button>
           <select class="speed-selector" onchange="setSpeed(parseFloat(this.value))">
             <option value="0.25">0.25×</option>
             <option value="0.5">0.5×</option>
@@ -1018,12 +864,11 @@
           </select>
         </div>
       </div>
-    </div>
+    </div><!-- /center -->
 
-    <!-- RIGHT PANEL -->
-    <div class="panel-right">
+    <!-- RIGHT PANEL (desktop only) -->
+    <div class="panel panel-right" id="right-panel">
 
-      <!-- VIDEO INFO -->
       <div class="panel-section">
         <div class="panel-title">📊 معلومات الفيديو</div>
         <div class="stat-row">
@@ -1033,681 +878,646 @@
         </div>
       </div>
 
-      <!-- BRIGHTNESS / CONTRAST -->
       <div class="panel-section">
         <div class="panel-title">☀️ الصورة</div>
         <div class="control-group">
-          <div class="control-label">
-            <span>السطوع</span>
-            <span class="control-value" id="bright-val">100%</span>
-          </div>
+          <div class="control-label"><span>السطوع</span><span class="control-value" id="bright-val">100%</span></div>
           <input type="range" id="brightness" min="0" max="200" value="100">
         </div>
         <div class="control-group">
-          <div class="control-label">
-            <span>التباين</span>
-            <span class="control-value" id="contrast-val">100%</span>
-          </div>
+          <div class="control-label"><span>التباين</span><span class="control-value" id="contrast-val">100%</span></div>
           <input type="range" id="contrast" min="0" max="200" value="100">
         </div>
         <div class="control-group">
-          <div class="control-label">
-            <span>التشبع</span>
-            <span class="control-value" id="saturate-val">100%</span>
-          </div>
+          <div class="control-label"><span>التشبع</span><span class="control-value" id="saturate-val">100%</span></div>
           <input type="range" id="saturate" min="0" max="300" value="100">
         </div>
         <div class="control-group">
-          <div class="control-label">
-            <span>درجة الألوان</span>
-            <span class="control-value" id="hue-val">0°</span>
-          </div>
+          <div class="control-label"><span>درجة الألوان</span><span class="control-value" id="hue-val">0°</span></div>
           <input type="range" id="hue" min="0" max="360" value="0">
         </div>
         <div class="control-group">
-          <div class="control-label">
-            <span>الضبابية</span>
-            <span class="control-value" id="blur-val">0px</span>
-          </div>
-          <input type="range" id="blur" min="0" max="10" value="0" step="0.5">
+          <div class="control-label"><span>الضبابية</span><span class="control-value" id="blur-val">0px</span></div>
+          <input type="range" id="blur-range" min="0" max="10" value="0" step="0.5">
         </div>
         <button class="toggle-btn" style="width:100%;margin-top:4px;" onclick="resetFilters()">🔄 إعادة تعيين</button>
       </div>
 
-      <!-- FILTERS -->
       <div class="panel-section">
         <div class="panel-title">🎨 فلاتر</div>
-        <div class="filter-grid">
-          <div class="filter-item active" onclick="applyFilter('none', this)">
-            <div class="filter-icon">🎬</div>عادي
-          </div>
-          <div class="filter-item" onclick="applyFilter('grayscale', this)">
-            <div class="filter-icon">⬛</div>أبيض وأسود
-          </div>
-          <div class="filter-item" onclick="applyFilter('sepia', this)">
-            <div class="filter-icon">🟤</div>كلاسيكي
-          </div>
-          <div class="filter-item" onclick="applyFilter('vintage', this)">
-            <div class="filter-icon">📷</div>فينتاج
-          </div>
-          <div class="filter-item" onclick="applyFilter('cool', this)">
-            <div class="filter-icon">🔵</div>بارد
-          </div>
-          <div class="filter-item" onclick="applyFilter('warm', this)">
-            <div class="filter-icon">🟠</div>دافئ
-          </div>
-          <div class="filter-item" onclick="applyFilter('saturate', this)">
-            <div class="filter-icon">🌈</div>حيوي
-          </div>
-          <div class="filter-item" onclick="applyFilter('invert', this)">
-            <div class="filter-icon">🔄</div>عكسي
-          </div>
+        <div class="filter-grid" id="filter-grid1">
+          <div class="filter-item active" onclick="applyFilter('none',this,'1')"><div class="filter-icon">🎬</div>عادي</div>
+          <div class="filter-item" onclick="applyFilter('grayscale',this,'1')"><div class="filter-icon">⬛</div>أبيض وأسود</div>
+          <div class="filter-item" onclick="applyFilter('sepia',this,'1')"><div class="filter-icon">🟤</div>كلاسيكي</div>
+          <div class="filter-item" onclick="applyFilter('vintage',this,'1')"><div class="filter-icon">📷</div>فينتاج</div>
+          <div class="filter-item" onclick="applyFilter('cool',this,'1')"><div class="filter-icon">🔵</div>بارد</div>
+          <div class="filter-item" onclick="applyFilter('warm',this,'1')"><div class="filter-icon">🟠</div>دافئ</div>
+          <div class="filter-item" onclick="applyFilter('saturate',this,'1')"><div class="filter-icon">🌈</div>حيوي</div>
+          <div class="filter-item" onclick="applyFilter('invert',this,'1')"><div class="filter-icon">🔄</div>عكسي</div>
         </div>
       </div>
 
-      <!-- TEXT OVERLAY -->
       <div class="panel-section">
         <div class="panel-title">📝 نص على الفيديو</div>
         <div class="control-group">
-          <textarea class="text-input" id="overlay-text" rows="2" placeholder="اكتب النص هنا..."></textarea>
+          <textarea class="text-input" id="overlay-text-d" rows="2" placeholder="اكتب النص هنا..."></textarea>
         </div>
         <div class="control-group">
-          <div class="control-label"><span>حجم الخط</span><span class="control-value" id="font-size-val">24px</span></div>
-          <input type="range" id="font-size" min="12" max="72" value="24">
+          <div class="control-label"><span>حجم الخط</span><span class="control-value" id="font-size-val-d">24px</span></div>
+          <input type="range" id="font-size-d" min="12" max="72" value="24">
         </div>
-        <div class="color-picker-row" style="margin-bottom:8px;">
-          <label style="font-size:12px; color:var(--text2);">لون النص</label>
-          <input type="color" id="text-color" value="#ffffff">
+        <div class="color-row">
+          <label>لون النص</label>
+          <input type="color" id="text-color-d" value="#ffffff">
         </div>
-        <div class="color-picker-row" style="margin-bottom:8px;">
-          <label style="font-size:12px; color:var(--text2);">خلفية النص</label>
-          <input type="color" id="text-bg" value="#000000">
-          <input type="range" id="text-bg-opacity" min="0" max="100" value="50" style="flex:1;">
+        <div class="color-row">
+          <label>خلفية</label>
+          <input type="color" id="text-bg-d" value="#000000">
+          <input type="range" id="text-bg-opacity-d" min="0" max="100" value="50" style="flex:1;">
         </div>
-        <button class="toggle-btn" style="width:100%;" onclick="applyTextOverlay()">✅ تطبيق النص</button>
-        <button class="toggle-btn" style="width:100%; margin-top:6px;" onclick="removeTextOverlay()">❌ إزالة النص</button>
+        <div class="toggle-row" style="margin-top:8px;">
+          <button class="toggle-btn" onclick="applyTextOverlayD()">✅ تطبيق</button>
+          <button class="toggle-btn" onclick="removeTextOverlay()">❌ إزالة</button>
+        </div>
       </div>
 
-    </div>
+    </div><!-- /right panel -->
 
-  </div>
+  </div><!-- /editor-grid -->
 
-  <!-- DOWNLOAD PANEL -->
-  <div class="download-panel" id="download-panel" style="display:none;">
+  <!-- DOWNLOAD BAR -->
+  <div class="download-bar" id="download-bar">
     <div class="video-info">
-      <div>📁 الملف: <span id="dl-filename">--</span></div>
-      <div>⏱ المدة: <span id="dl-duration">--</span></div>
+      <div>📁 <span id="dl-filename">--</span></div>
+      <div>⏱ <span id="dl-duration">--</span></div>
     </div>
-    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-      <label style="font-size:13px; color:var(--text2);">الصيغة:</label>
-      <select class="format-select" id="format-select">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <select class="fmt-sel" id="format-select">
         <option value="mp4">MP4</option>
         <option value="webm">WebM</option>
       </select>
-      <label style="font-size:13px; color:var(--text2);">الجودة:</label>
-      <select class="quality-select" id="quality-select">
-        <option value="high">عالية</option>
-        <option value="medium" selected>متوسطة</option>
-        <option value="low">منخفضة</option>
+      <select class="qual-sel" id="quality-select">
+        <option value="high">جودة عالية</option>
+        <option value="medium" selected>جودة متوسطة</option>
+        <option value="low">جودة منخفضة</option>
       </select>
     </div>
-    <button class="download-btn" id="download-btn" onclick="exportVideo()">
-      ⬇️ تنزيل الفيديو
-    </button>
+    <button class="download-btn" onclick="exportVideo()">⬇️ تنزيل الفيديو</button>
   </div>
 
-</div>
+</div><!-- /editor-screen -->
 
-<!-- EXPORT PROGRESS OVERLAY -->
-<div class="export-progress" id="export-progress">
-  <div class="progress-box">
-    <div class="progress-spinner"></div>
-    <h3 style="font-size:18px; margin-bottom:8px;">جارٍ تصدير الفيديو...</h3>
-    <p style="color:var(--text2); font-size:13px;" id="progress-label">يُرجى الانتظار</p>
-    <div class="progress-bar-wrap" style="margin-top:16px;">
+</div><!-- /app -->
+
+<!-- EXPORT OVERLAY -->
+<div class="export-overlay" id="export-overlay">
+  <div class="export-box">
+    <div class="spinner"></div>
+    <h3 style="font-size:18px;margin-bottom:8px;">جارٍ تصدير الفيديو...</h3>
+    <p style="color:var(--text2);font-size:13px;" id="progress-label">يُرجى الانتظار</p>
+    <div class="progress-bar-wrap">
       <div class="progress-bar" id="progress-bar"></div>
     </div>
-    <p style="color:var(--text3); font-size:11px; margin-top:12px;">
-      التصدير يعتمد على قدرات المتصفح
-    </p>
   </div>
 </div>
 
 <script>
-// ─────────────────────────────────────────
-//  STATE
-// ─────────────────────────────────────────
-const state = {
-  videoFile: null,
-  videoURL: null,
-  duration: 0,
-  trimStart: 0,
-  trimEnd: 0,
-  volume: 1,
-  playbackRate: 1,
-  rotation: 0,
-  flipH: false,
-  flipV: false,
-  isMuted: false,
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+const S = {
+  videoFile: null, videoURL: null, duration: 0,
+  trimStart: 0, trimEnd: 0,
+  volume: 1, playbackRate: 1,
+  rotation: 0, flipH: false, flipV: false,
+  isMuted: false, reverseAudio: false,
   filter: 'none',
-  brightness: 100,
-  contrast: 100,
-  saturate: 100,
-  hue: 0,
-  blur: 0,
-  textContent: '',
-  reverseAudio: false
+  brightness: 100, contrast: 100, saturate: 100, hue: 0, blur: 0,
+  textContent: '', textColor: '#ffffff', textBg: '#000000', textBgOp: 0.5, textSize: 24
 };
 
 const video = document.getElementById('main-video');
+const isMobile = () => window.innerWidth <= 900;
 
-// ─────────────────────────────────────────
-//  UPLOAD
-// ─────────────────────────────────────────
-const dropZone = document.getElementById('drop-zone');
+/* ═══════════════════════════════════════
+   RESPONSIVE INIT
+═══════════════════════════════════════ */
+function handleResize() {
+  const mobile = isMobile();
+  document.getElementById('mobile-tabs').style.display     = mobile ? 'block' : 'none';
+  document.getElementById('mobile-panels').style.display   = mobile ? 'block' : 'none';
+  document.getElementById('left-panel').style.display      = mobile ? 'none'  : 'flex';
+  document.getElementById('right-panel').style.display     = mobile ? 'none'  : 'flex';
+
+  if (mobile) {
+    document.getElementById('editor-grid').style.gridTemplateColumns = '1fr';
+  } else {
+    document.getElementById('editor-grid').style.gridTemplateColumns = 'var(--panel-w) 1fr var(--panel-w)';
+  }
+}
+window.addEventListener('resize', handleResize);
+
+/* Mobile tabs */
+function showTab(name) {
+  document.querySelectorAll('.mtab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.mobile-panel').forEach(p => p.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  const panel = document.getElementById('mpanel-' + name);
+  if (panel) panel.classList.add('active');
+}
+
+/* ═══════════════════════════════════════
+   FILE INPUT — fixed trigger
+═══════════════════════════════════════ */
 const fileInput = document.getElementById('file-input');
+const dropZone  = document.getElementById('drop-zone');
 
+/* The input is position:absolute covering drop-zone, so clicks land on it naturally.
+   We also wire change event here. */
+fileInput.addEventListener('change', e => {
+  const file = e.target.files && e.target.files[0];
+  if (file && file.type.startsWith('video/')) loadVideo(file);
+  fileInput.value = ''; // reset so same file can be re-selected
+});
+
+/* Drag & drop */
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
 dropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropZone.classList.remove('drag-over');
+  e.preventDefault(); dropZone.classList.remove('drag-over');
   const file = e.dataTransfer.files[0];
   if (file && file.type.startsWith('video/')) loadVideo(file);
 });
 
-fileInput.addEventListener('change', e => {
-  if (e.target.files[0]) loadVideo(e.target.files[0]);
-});
-
 function loadVideo(file) {
-  state.videoFile = file;
-  state.videoURL = URL.createObjectURL(file);
-  video.src = state.videoURL;
+  S.videoFile = file;
+  S.videoURL  = URL.createObjectURL(file);
+  video.src   = S.videoURL;
 
-  document.getElementById('upload-section').classList.remove('visible');
-  document.getElementById('upload-section').style.display = 'none';
-  document.getElementById('editor-wrapper').style.display = 'grid';
-  document.getElementById('download-panel').style.display = 'flex';
-
+  document.getElementById('upload-screen').style.display  = 'none';
+  document.getElementById('editor-screen').style.display  = 'block';
   document.getElementById('file-name-display').textContent = file.name;
-  document.getElementById('dl-filename').textContent = file.name;
+  document.getElementById('dl-filename').textContent       = file.name;
+  document.getElementById('info-size').textContent         = (file.size / 1048576).toFixed(2) + ' MB';
 
-  const sizeMB = (file.size / 1048576).toFixed(2);
-  document.getElementById('info-size').textContent = sizeMB + ' MB';
+  handleResize();
 
   video.addEventListener('loadedmetadata', () => {
-    state.duration = video.duration;
-    state.trimEnd = video.duration;
+    S.duration  = video.duration;
+    S.trimEnd   = video.duration;
 
-    document.getElementById('trim-end').value = video.duration.toFixed(1);
-    document.getElementById('trim-end').max = video.duration;
-    document.getElementById('trim-start').max = video.duration;
+    // desktop trim
+    document.getElementById('trim-end-d').value   = video.duration.toFixed(1);
+    document.getElementById('trim-end-d').max     = video.duration;
+    document.getElementById('trim-start-d').max   = video.duration;
+    // mobile trim
+    document.getElementById('trim-end').value     = video.duration.toFixed(1);
+    document.getElementById('trim-end').max       = video.duration;
+    document.getElementById('trim-start').max     = video.duration;
 
-    document.getElementById('timeline').max = video.duration;
-    document.getElementById('duration-display').textContent = formatTime(video.duration);
-    document.getElementById('info-duration').textContent = formatTime(video.duration);
-    document.getElementById('dl-duration').textContent = formatTime(video.duration);
-
-    document.getElementById('info-res').textContent = video.videoWidth + '×' + video.videoHeight;
+    document.getElementById('timeline').max             = video.duration;
+    document.getElementById('duration-display').textContent = fmt(video.duration);
+    document.getElementById('info-duration').textContent    = fmt(video.duration);
+    document.getElementById('dl-duration').textContent      = fmt(video.duration);
+    document.getElementById('info-res').textContent         = video.videoWidth + '×' + video.videoHeight;
 
     updateTrimRange();
   }, { once: true });
 }
 
-// ─────────────────────────────────────────
-//  PLAYBACK
-// ─────────────────────────────────────────
+/* ═══════════════════════════════════════
+   PLAYBACK
+═══════════════════════════════════════ */
 function togglePlay() {
-  if (video.paused) {
-    video.play();
-    document.getElementById('play-btn').textContent = '⏸';
-  } else {
-    video.pause();
-    document.getElementById('play-btn').textContent = '▶';
-  }
+  if (video.paused) { video.play(); document.getElementById('play-btn').textContent = '⏸'; }
+  else              { video.pause(); document.getElementById('play-btn').textContent = '▶'; }
 }
-
-function seekTo(t) { video.currentTime = t; }
-function seekBy(s) { video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + s)); }
-function seekEnd() { video.currentTime = video.duration; }
+function seekTo(t)   { video.currentTime = t; }
+function seekBy(s)   { video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + s)); }
+function seekEnd()   { video.currentTime = video.duration; }
 
 video.addEventListener('timeupdate', () => {
   const t = video.currentTime;
   document.getElementById('timeline').value = t;
-  document.getElementById('current-time-display').textContent = formatTime(t);
-
-  // Auto-stop at trim end
-  if (t >= state.trimEnd && state.trimEnd > 0) {
+  document.getElementById('current-time-display').textContent = fmt(t);
+  if (S.trimEnd > 0 && t >= S.trimEnd) {
     video.pause();
     document.getElementById('play-btn').textContent = '▶';
   }
 });
+video.addEventListener('ended', () => { document.getElementById('play-btn').textContent = '▶'; });
+document.getElementById('timeline').addEventListener('input', e => { video.currentTime = parseFloat(e.target.value); });
 
-video.addEventListener('ended', () => {
-  document.getElementById('play-btn').textContent = '▶';
-});
-
-document.getElementById('timeline').addEventListener('input', e => {
-  video.currentTime = parseFloat(e.target.value);
-});
-
-// ─────────────────────────────────────────
-//  SPEED
-// ─────────────────────────────────────────
+/* ═══════════════════════════════════════
+   SPEED
+═══════════════════════════════════════ */
 function setSpeed(v) {
-  state.playbackRate = v;
-  video.playbackRate = v;
-  document.getElementById('speed-val').textContent = v + '×';
-  document.getElementById('speed-range').value = v;
+  S.playbackRate = v; video.playbackRate = v;
+  setAll('speed-val', v + '×'); setAll('speed-val2', v + '×');
+  document.getElementById('speed-range').value  = v;
+  document.getElementById('speed-range2').value = v;
 }
+document.getElementById('speed-range').addEventListener('input',  e => setSpeed(parseFloat(e.target.value)));
+document.getElementById('speed-range2').addEventListener('input', e => setSpeed(parseFloat(e.target.value)));
 
-document.getElementById('speed-range').addEventListener('input', e => {
-  setSpeed(parseFloat(e.target.value));
-});
-
-// ─────────────────────────────────────────
-//  VOLUME
-// ─────────────────────────────────────────
-document.getElementById('volume').addEventListener('input', e => {
-  const v = parseInt(e.target.value);
-  state.volume = v / 100;
-  video.volume = Math.min(1, v / 100);
-  document.getElementById('vol-val').textContent = v + '%';
+/* ═══════════════════════════════════════
+   VOLUME
+═══════════════════════════════════════ */
+function syncVolume(v) {
+  S.volume = v / 100; video.volume = Math.min(1, v / 100);
+  setAll('vol-val', v + '%'); setAll('vol-val2', v + '%');
+}
+document.getElementById('volume').addEventListener('input',  e => syncVolume(parseInt(e.target.value)));
+document.getElementById('volume2').addEventListener('input', e => {
+  document.getElementById('volume').value = e.target.value;
+  syncVolume(parseInt(e.target.value));
 });
 
 function toggleMute() {
-  state.isMuted = !state.isMuted;
-  video.muted = state.isMuted;
-  const btn = document.getElementById('mute-btn');
-  btn.classList.toggle('active', state.isMuted);
-  btn.textContent = state.isMuted ? '🔕 مكتوم' : '🔇 كتم';
+  S.isMuted = !S.isMuted; video.muted = S.isMuted;
+  ['mute-btn','mute-btn2'].forEach(id => {
+    const b = document.getElementById(id);
+    if (!b) return;
+    b.classList.toggle('active', S.isMuted);
+    b.textContent = S.isMuted ? '🔕 مكتوم' : '🔇 كتم';
+  });
 }
-
 function toggleReverseAudio() {
-  state.reverseAudio = !state.reverseAudio;
-  document.getElementById('reverse-audio-btn').classList.toggle('active', state.reverseAudio);
+  S.reverseAudio = !S.reverseAudio;
+  ['rev-btn','rev-btn2'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.classList.toggle('active', S.reverseAudio);
+  });
 }
 
-document.getElementById('bass').addEventListener('input', e => {
-  document.getElementById('bass-val').textContent = e.target.value;
-});
-document.getElementById('treble').addEventListener('input', e => {
-  document.getElementById('treble-val').textContent = e.target.value;
-});
+document.getElementById('bass').addEventListener('input',   e => document.getElementById('bass-val').textContent   = e.target.value);
+document.getElementById('treble').addEventListener('input', e => document.getElementById('treble-val').textContent = e.target.value);
 
-// ─────────────────────────────────────────
-//  TRIM
-// ─────────────────────────────────────────
-document.getElementById('trim-start').addEventListener('input', e => {
-  state.trimStart = parseFloat(e.target.value) || 0;
-  updateTrimRange();
-});
-
-document.getElementById('trim-end').addEventListener('input', e => {
-  state.trimEnd = parseFloat(e.target.value) || state.duration;
-  updateTrimRange();
-});
+/* ═══════════════════════════════════════
+   TRIM
+═══════════════════════════════════════ */
+function bindTrim(startId, endId) {
+  document.getElementById(startId).addEventListener('input', e => {
+    S.trimStart = parseFloat(e.target.value) || 0;
+    mirrorTrim();
+    updateTrimRange();
+  });
+  document.getElementById(endId).addEventListener('input', e => {
+    S.trimEnd = parseFloat(e.target.value) || S.duration;
+    mirrorTrim();
+    updateTrimRange();
+  });
+}
+function mirrorTrim() {
+  document.getElementById('trim-start-d').value = S.trimStart;
+  document.getElementById('trim-start').value   = S.trimStart;
+  document.getElementById('trim-end-d').value   = S.trimEnd;
+  document.getElementById('trim-end').value     = S.trimEnd;
+}
+bindTrim('trim-start-d','trim-end-d');
+bindTrim('trim-start','trim-end');
 
 function updateTrimRange() {
-  if (!state.duration) return;
-  const startPct = (state.trimStart / state.duration) * 100;
-  const endPct = (state.trimEnd / state.duration) * 100;
-  const range = document.getElementById('trim-range');
-  range.style.left = startPct + '%';
-  range.style.width = (endPct - startPct) + '%';
+  if (!S.duration) return;
+  const r = document.getElementById('trim-range');
+  const sp = (S.trimStart / S.duration) * 100;
+  const ep = (S.trimEnd   / S.duration) * 100;
+  r.style.left  = sp + '%';
+  r.style.width = (ep - sp) + '%';
 }
 
-// ─────────────────────────────────────────
-//  ROTATION & FLIP
-// ─────────────────────────────────────────
+/* ═══════════════════════════════════════
+   ROTATION & FLIP
+═══════════════════════════════════════ */
 document.getElementById('rotate').addEventListener('input', e => {
-  state.rotation = parseInt(e.target.value);
-  document.getElementById('rotate-val').textContent = state.rotation + '°';
+  S.rotation = parseInt(e.target.value);
+  document.getElementById('rotate-val').textContent  = S.rotation + '°';
+  document.getElementById('rotate-val2').textContent = S.rotation + '°';
+  document.getElementById('rotate2').value = S.rotation;
+  applyTransform();
+});
+document.getElementById('rotate2').addEventListener('input', e => {
+  S.rotation = parseInt(e.target.value);
+  document.getElementById('rotate-val').textContent  = S.rotation + '°';
+  document.getElementById('rotate-val2').textContent = S.rotation + '°';
+  document.getElementById('rotate').value = S.rotation;
   applyTransform();
 });
 
 function setRotate(deg) {
-  state.rotation = ((state.rotation + deg) % 360 + 360) % 360;
-  document.getElementById('rotate').value = state.rotation;
-  document.getElementById('rotate-val').textContent = state.rotation + '°';
+  S.rotation = ((S.rotation + deg) % 360 + 360) % 360;
+  document.getElementById('rotate').value  = S.rotation;
+  document.getElementById('rotate2').value = S.rotation;
+  document.getElementById('rotate-val').textContent  = S.rotation + '°';
+  document.getElementById('rotate-val2').textContent = S.rotation + '°';
   applyTransform();
 }
 
 function toggleFlip(dir) {
-  if (dir === 'h') state.flipH = !state.flipH;
-  if (dir === 'v') state.flipV = !state.flipV;
+  if (dir === 'h') S.flipH = !S.flipH;
+  if (dir === 'v') S.flipV = !S.flipV;
   applyTransform();
 }
 
 function applyTransform() {
-  const sx = state.flipH ? -1 : 1;
-  const sy = state.flipV ? -1 : 1;
-  video.style.transform = `rotate(${state.rotation}deg) scale(${sx}, ${sy})`;
+  video.style.transform = `rotate(${S.rotation}deg) scale(${S.flipH?-1:1},${S.flipV?-1:1})`;
 }
 
-// ─────────────────────────────────────────
-//  IMAGE ADJUSTMENTS
-// ─────────────────────────────────────────
-function updateVideoFilter() {
-  const filterMap = {
-    'none': '',
-    'grayscale': 'grayscale(100%)',
-    'sepia': 'sepia(80%)',
-    'invert': 'invert(100%)',
-    'blur': 'blur(2px)',
-    'saturate': 'saturate(200%)',
-    'vintage': 'sepia(40%) contrast(1.1) brightness(0.95)',
-    'cool': 'hue-rotate(30deg) saturate(120%)',
-    'warm': 'hue-rotate(-15deg) saturate(130%) brightness(1.05)'
-  };
+/* ═══════════════════════════════════════
+   IMAGE ADJUSTMENTS
+═══════════════════════════════════════ */
+const filterPresets = {
+  none:'', grayscale:'grayscale(100%)', sepia:'sepia(80%)',
+  invert:'invert(100%)', saturate:'saturate(200%)',
+  vintage:'sepia(40%) contrast(1.1) brightness(0.95)',
+  cool:'hue-rotate(30deg) saturate(120%)',
+  warm:'hue-rotate(-15deg) saturate(130%) brightness(1.05)'
+};
 
-  const base = filterMap[state.filter] || '';
-  const adj = `brightness(${state.brightness}%) contrast(${state.contrast}%) saturate(${state.saturate}%) hue-rotate(${state.hue}deg) blur(${state.blur}px)`;
-  video.style.filter = base + ' ' + adj;
+function buildFilter() {
+  return (filterPresets[S.filter]||'') + ` brightness(${S.brightness}%) contrast(${S.contrast}%) saturate(${S.saturate}%) hue-rotate(${S.hue}deg) blur(${S.blur}px)`;
+}
+function applyVideoFilter() { video.style.filter = buildFilter(); }
+
+function bindAdj(desktopId, mobileId, stateKey, valId1, valId2, unit) {
+  function update(v) {
+    S[stateKey] = v;
+    if(valId1) document.getElementById(valId1).textContent = v + unit;
+    if(valId2) document.getElementById(valId2).textContent = v + unit;
+    applyVideoFilter();
+  }
+  if(document.getElementById(desktopId))
+    document.getElementById(desktopId).addEventListener('input', e => {
+      if(mobileId) document.getElementById(mobileId).value = e.target.value;
+      update(parseFloat(e.target.value));
+    });
+  if(mobileId && document.getElementById(mobileId))
+    document.getElementById(mobileId).addEventListener('input', e => {
+      if(desktopId) document.getElementById(desktopId).value = e.target.value;
+      update(parseFloat(e.target.value));
+    });
 }
 
-['brightness','contrast','saturate','hue','blur'].forEach(id => {
-  document.getElementById(id).addEventListener('input', e => {
-    const v = parseFloat(e.target.value);
-    state[id] = v;
-    const unit = id === 'hue' ? '°' : id === 'blur' ? 'px' : '%';
-    document.getElementById(id.replace('saturate','saturate') + '-val').textContent = v + unit;
-    updateVideoFilter();
+bindAdj('brightness','brightness2','brightness','bright-val','bright-val2','%');
+bindAdj('contrast',  'contrast2',  'contrast',  'contrast-val','contrast-val2','%');
+bindAdj('saturate',  'saturate2',  'saturate',  'saturate-val','saturate-val2','%');
+bindAdj('hue',       'hue2',       'hue',       'hue-val','hue-val2','°');
+bindAdj('blur-range', null,        'blur',      'blur-val',null,'px');
+
+function applyFilter(name, el, grid) {
+  S.filter = name;
+  document.querySelectorAll('#filter-grid1 .filter-item, #filter-grid2 .filter-item')
+    .forEach(i => i.classList.remove('active'));
+  // highlight in both grids
+  ['filter-grid1','filter-grid2'].forEach(gid => {
+    const g = document.getElementById(gid);
+    if (!g) return;
+    const items = g.querySelectorAll('.filter-item');
+    const names = ['none','grayscale','sepia','vintage','cool','warm','saturate','invert'];
+    items.forEach((item,idx) => { if(names[idx]===name) item.classList.add('active'); });
   });
-});
-
-// Fix label IDs
-document.getElementById('brightness').addEventListener('input', e => {
-  document.getElementById('bright-val').textContent = e.target.value + '%';
-});
-document.getElementById('contrast').addEventListener('input', e => {
-  document.getElementById('contrast-val').textContent = e.target.value + '%';
-});
-document.getElementById('saturate').addEventListener('input', e => {
-  document.getElementById('saturate-val').textContent = e.target.value + '%';
-});
-document.getElementById('hue').addEventListener('input', e => {
-  document.getElementById('hue-val').textContent = e.target.value + '°';
-});
-document.getElementById('blur').addEventListener('input', e => {
-  document.getElementById('blur-val').textContent = e.target.value + 'px';
-  state.blur = parseFloat(e.target.value);
-  updateVideoFilter();
-});
-
-function applyFilter(name, el) {
-  document.querySelectorAll('.filter-item').forEach(i => i.classList.remove('active'));
-  el.classList.add('active');
-  state.filter = name;
-  updateVideoFilter();
+  applyVideoFilter();
 }
 
 function resetFilters() {
-  state.brightness = 100;
-  state.contrast = 100;
-  state.saturate = 100;
-  state.hue = 0;
-  state.blur = 0;
-  document.getElementById('brightness').value = 100;
-  document.getElementById('contrast').value = 100;
-  document.getElementById('saturate').value = 100;
-  document.getElementById('hue').value = 0;
-  document.getElementById('blur').value = 0;
-  document.getElementById('bright-val').textContent = '100%';
-  document.getElementById('contrast-val').textContent = '100%';
-  document.getElementById('saturate-val').textContent = '100%';
-  document.getElementById('hue-val').textContent = '0°';
-  document.getElementById('blur-val').textContent = '0px';
-  state.filter = 'none';
-  document.querySelectorAll('.filter-item').forEach((i, idx) => {
-    i.classList.toggle('active', idx === 0);
+  S.brightness=100; S.contrast=100; S.saturate=100; S.hue=0; S.blur=0; S.filter='none';
+  ['brightness','contrast','saturate','hue','blur-range'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value=id==='hue'?0:id==='blur-range'?0:100;
   });
-  updateVideoFilter();
+  ['brightness2','contrast2','saturate2','hue2'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value=id==='hue2'?0:100;
+  });
+  document.getElementById('bright-val').textContent='100%';
+  document.getElementById('contrast-val').textContent='100%';
+  document.getElementById('saturate-val').textContent='100%';
+  document.getElementById('hue-val').textContent='0°';
+  document.getElementById('blur-val').textContent='0px';
+  if(document.getElementById('bright-val2')) document.getElementById('bright-val2').textContent='100%';
+  if(document.getElementById('contrast-val2')) document.getElementById('contrast-val2').textContent='100%';
+  if(document.getElementById('saturate-val2')) document.getElementById('saturate-val2').textContent='100%';
+  if(document.getElementById('hue-val2')) document.getElementById('hue-val2').textContent='0°';
+  applyVideoFilter();
+  applyFilter('none', null, null);
 }
 
-// ─────────────────────────────────────────
-//  TEXT OVERLAY
-// ─────────────────────────────────────────
-document.getElementById('font-size').addEventListener('input', e => {
-  document.getElementById('font-size-val').textContent = e.target.value + 'px';
-  updateTextOverlay();
-});
-
-document.getElementById('text-color').addEventListener('input', updateTextOverlay);
-document.getElementById('text-bg').addEventListener('input', updateTextOverlay);
-document.getElementById('text-bg-opacity').addEventListener('input', updateTextOverlay);
-
-function hexToRgba(hex, alpha) {
-  const r = parseInt(hex.slice(1,3),16);
-  const g = parseInt(hex.slice(3,5),16);
-  const b = parseInt(hex.slice(5,7),16);
-  return `rgba(${r},${g},${b},${alpha})`;
+/* ═══════════════════════════════════════
+   TEXT OVERLAY
+═══════════════════════════════════════ */
+function getTextFields(suffix) {
+  return {
+    textEl:   document.getElementById('overlay-text' + suffix),
+    sizeEl:   document.getElementById('font-size' + suffix),
+    colorEl:  document.getElementById('text-color' + suffix),
+    bgEl:     document.getElementById('text-bg' + suffix),
+    bgOpEl:   document.getElementById('text-bg-opacity' + suffix),
+  };
 }
 
-function applyTextOverlay() {
-  const txt = document.getElementById('overlay-text').value.trim();
-  const overlay = document.getElementById('text-overlay');
-  if (!txt) { overlay.style.display = 'none'; return; }
-  state.textContent = txt;
-  overlay.textContent = txt;
-  overlay.style.display = 'block';
-  updateTextOverlay();
+function applyTextOverlayD() { applyFromFields(getTextFields('-d')); }
+function applyTextOverlay()  { applyFromFields(getTextFields('')); }
+
+function applyFromFields(f) {
+  const txt = f.textEl.value.trim();
+  if (!txt) { removeTextOverlay(); return; }
+  S.textContent = txt;
+  S.textColor   = f.colorEl.value;
+  S.textBg      = f.bgEl.value;
+  S.textBgOp    = (f.bgOpEl.value || 50) / 100;
+  S.textSize    = parseInt(f.sizeEl.value);
+  renderTextOverlay();
 }
 
-function updateTextOverlay() {
-  const overlay = document.getElementById('text-overlay');
-  if (overlay.style.display === 'none') return;
-  const size = document.getElementById('font-size').value;
-  const color = document.getElementById('text-color').value;
-  const bg = document.getElementById('text-bg').value;
-  const opacity = document.getElementById('text-bg-opacity').value / 100;
-  overlay.style.fontSize = size + 'px';
-  overlay.style.color = color;
-  overlay.style.backgroundColor = hexToRgba(bg, opacity);
+function renderTextOverlay() {
+  const o = document.getElementById('text-overlay');
+  o.textContent = S.textContent;
+  o.style.display         = 'block';
+  o.style.fontSize        = S.textSize + 'px';
+  o.style.color           = S.textColor;
+  o.style.backgroundColor = hexRgba(S.textBg, S.textBgOp);
 }
 
 function removeTextOverlay() {
+  S.textContent = '';
   document.getElementById('text-overlay').style.display = 'none';
-  state.textContent = '';
 }
 
-// Make text overlay draggable
-const textOvl = document.getElementById('text-overlay');
-let dragging = false, ox = 0, oy = 0;
-
-textOvl.addEventListener('mousedown', e => {
-  dragging = true;
-  const rect = textOvl.getBoundingClientRect();
-  ox = e.clientX - rect.left;
-  oy = e.clientY - rect.top;
-  textOvl.style.transform = 'none';
-  e.preventDefault();
+// Font size labels
+document.getElementById('font-size').addEventListener('input', e => {
+  document.getElementById('font-size-val').textContent = e.target.value + 'px';
 });
+document.getElementById('font-size-d').addEventListener('input', e => {
+  document.getElementById('font-size-val-d').textContent = e.target.value + 'px';
+});
+
+// Draggable text overlay
+let dragging=false, ox=0, oy=0;
+const textOvl = document.getElementById('text-overlay');
+textOvl.addEventListener('mousedown', e => {
+  dragging=true;
+  const r=textOvl.getBoundingClientRect();
+  ox=e.clientX-r.left; oy=e.clientY-r.top;
+  textOvl.style.transform='none'; e.preventDefault();
+});
+// Touch support
+textOvl.addEventListener('touchstart', e => {
+  dragging=true;
+  const t=e.touches[0], r=textOvl.getBoundingClientRect();
+  ox=t.clientX-r.left; oy=t.clientY-r.top;
+  textOvl.style.transform='none'; e.preventDefault();
+},{passive:false});
 
 document.addEventListener('mousemove', e => {
-  if (!dragging) return;
-  const wrapper = document.getElementById('video-wrapper').getBoundingClientRect();
-  let x = e.clientX - wrapper.left - ox;
-  let y = e.clientY - wrapper.top - oy;
-  textOvl.style.left = Math.max(0, x) + 'px';
-  textOvl.style.top = Math.max(0, y) + 'px';
+  if(!dragging)return;
+  moveTo(e.clientX,e.clientY);
 });
+document.addEventListener('touchmove', e => {
+  if(!dragging)return;
+  moveTo(e.touches[0].clientX,e.touches[0].clientY);
+},{passive:true});
+document.addEventListener('mouseup',  ()=>{ dragging=false; });
+document.addEventListener('touchend', ()=>{ dragging=false; });
 
-document.addEventListener('mouseup', () => { dragging = false; });
+function moveTo(cx,cy) {
+  const wr=document.getElementById('video-wrapper').getBoundingClientRect();
+  textOvl.style.left=Math.max(0,cx-wr.left-ox)+'px';
+  textOvl.style.top =Math.max(0,cy-wr.top-oy)+'px';
+}
 
-// ─────────────────────────────────────────
-//  EXPORT / DOWNLOAD
-// ─────────────────────────────────────────
+/* ═══════════════════════════════════════
+   EXPORT
+═══════════════════════════════════════ */
 async function exportVideo() {
   if (!video.src) return;
-
-  const progress = document.getElementById('export-progress');
-  const bar = document.getElementById('progress-bar');
-  const label = document.getElementById('progress-label');
-  progress.classList.add('visible');
+  const overlay = document.getElementById('export-overlay');
+  const bar     = document.getElementById('progress-bar');
+  const label   = document.getElementById('progress-label');
+  overlay.classList.add('visible');
 
   try {
-    // Try MediaRecorder capture approach
     const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth || 640;
+    canvas.width  = video.videoWidth  || 640;
     canvas.height = video.videoHeight || 360;
     const ctx = canvas.getContext('2d');
 
-    const format = document.getElementById('format-select').value;
     const quality = document.getElementById('quality-select').value;
-    const mimeType = format === 'webm' ? 'video/webm;codecs=vp9' : 'video/webm';
-
-    let bitsPerSecond = quality === 'high' ? 4000000 : quality === 'medium' ? 2000000 : 800000;
+    const bps = quality==='high'?4000000:quality==='medium'?2000000:800000;
+    const mimeType = 'video/webm;codecs=vp9';
 
     const stream = canvas.captureStream(30);
 
-    // Add audio
-    let audioStream = null;
     try {
-      const audioCtx = new AudioContext();
-      const src = audioCtx.createMediaElementSource(video);
-      const gainNode = audioCtx.createGain();
-      gainNode.gain.value = state.isMuted ? 0 : state.volume;
-      src.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      const dest = audioCtx.createMediaStreamDestination();
-      gainNode.connect(dest);
-      audioStream = dest.stream;
-      dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
-    } catch(e) { /* audio capture not supported — continue without */ }
+      const aCtx = new AudioContext();
+      const src  = aCtx.createMediaElementSource(video);
+      const gain = aCtx.createGain();
+      gain.gain.value = S.isMuted ? 0 : S.volume;
+      src.connect(gain);
+      gain.connect(aCtx.destination);
+      const dest = aCtx.createMediaStreamDestination();
+      gain.connect(dest);
+      dest.stream.getAudioTracks().forEach(t=>stream.addTrack(t));
+    } catch(e) {}
 
-    const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: bitsPerSecond });
+    const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: bps });
     const chunks = [];
-    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-
-    const filterMap = {
-      'none': '',
-      'grayscale': 'grayscale(100%)',
-      'sepia': 'sepia(80%)',
-      'invert': 'invert(100%)',
-      'saturate': 'saturate(200%)',
-      'vintage': 'sepia(40%) contrast(1.1) brightness(0.95)',
-      'cool': 'hue-rotate(30deg) saturate(120%)',
-      'warm': 'hue-rotate(-15deg) saturate(130%) brightness(1.05)'
-    };
+    recorder.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
 
     recorder.start(100);
-    video.currentTime = state.trimStart;
-    video.playbackRate = state.playbackRate;
+    video.currentTime  = S.trimStart;
+    video.playbackRate = S.playbackRate;
 
-    const totalDur = state.trimEnd - state.trimStart;
+    const total = S.trimEnd - S.trimStart;
     let startTS = null;
 
     await new Promise((resolve, reject) => {
-      const rafLoop = (ts) => {
-        if (!startTS) startTS = ts;
-        const elapsed = (ts - startTS) / 1000 * state.playbackRate;
-        const pct = Math.min(elapsed / totalDur, 1);
-        bar.style.width = (pct * 100) + '%';
-        label.textContent = 'تم: ' + Math.round(pct * 100) + '%';
+      const loop = ts => {
+        if(!startTS) startTS=ts;
+        const elapsed = (ts-startTS)/1000 * S.playbackRate;
+        const pct = Math.min(elapsed/total,1);
+        bar.style.width = (pct*100)+'%';
+        label.textContent = 'تم: '+Math.round(pct*100)+'%';
 
-        if (video.currentTime >= state.trimEnd - 0.05 || pct >= 1) {
-          video.pause();
-          recorder.stop();
-          resolve();
-          return;
+        if(video.currentTime >= S.trimEnd-0.05 || pct>=1) {
+          video.pause(); recorder.stop(); resolve(); return;
         }
 
-        // Apply filter + adjustments via canvas
         ctx.save();
-        const filterStr = (filterMap[state.filter] || '') + ` brightness(${state.brightness/100}) contrast(${state.contrast/100}) saturate(${state.saturate/100}) hue-rotate(${state.hue}deg) blur(${state.blur}px)`;
-        ctx.filter = filterStr.trim();
-
-        // Handle flip/rotate
+        const fStr = (filterPresets[S.filter]||'') + ` brightness(${S.brightness/100}) contrast(${S.contrast/100}) saturate(${S.saturate/100}) hue-rotate(${S.hue}deg) blur(${S.blur}px)`;
+        ctx.filter = fStr.trim();
         ctx.translate(canvas.width/2, canvas.height/2);
-        ctx.rotate(state.rotation * Math.PI / 180);
-        ctx.scale(state.flipH ? -1 : 1, state.flipV ? -1 : 1);
-        ctx.drawImage(video, -canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
+        ctx.rotate(S.rotation*Math.PI/180);
+        ctx.scale(S.flipH?-1:1, S.flipV?-1:1);
+        ctx.drawImage(video,-canvas.width/2,-canvas.height/2,canvas.width,canvas.height);
         ctx.restore();
 
-        // Draw text overlay
-        if (state.textContent) {
-          const size = parseInt(document.getElementById('font-size').value);
-          const color = document.getElementById('text-color').value;
-          const bg = document.getElementById('text-bg').value;
-          const op = document.getElementById('text-bg-opacity').value / 100;
-          ctx.font = `bold ${size}px Cairo, sans-serif`;
-          const tw = ctx.measureText(state.textContent).width;
-          const tx = canvas.width/2 - tw/2;
-          const ty = size + 20;
-          ctx.fillStyle = hexToRgba(bg, op);
-          ctx.fillRect(tx - 10, ty - size, tw + 20, size + 10);
-          ctx.fillStyle = color;
-          ctx.fillText(state.textContent, tx, ty);
+        if(S.textContent) {
+          ctx.font = `bold ${S.textSize}px Cairo,sans-serif`;
+          ctx.textBaseline='top';
+          const tw=ctx.measureText(S.textContent).width;
+          const tx=canvas.width/2-tw/2, ty=16;
+          ctx.fillStyle=hexRgba(S.textBg,S.textBgOp);
+          ctx.fillRect(tx-8,ty-4,tw+16,S.textSize+12);
+          ctx.fillStyle=S.textColor;
+          ctx.fillText(S.textContent,tx,ty);
         }
 
-        requestAnimationFrame(rafLoop);
+        requestAnimationFrame(loop);
       };
-
-      video.play().then(() => requestAnimationFrame(rafLoop)).catch(reject);
+      video.play().then(()=>requestAnimationFrame(loop)).catch(reject);
     });
 
-    await new Promise(r => setTimeout(r, 300));
+    await new Promise(r=>setTimeout(r,400));
 
     recorder.onstop = () => {
-      const blob = new Blob(chunks, { type: mimeType });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      const ext = format === 'webm' ? 'webm' : 'webm'; // browsers record in webm
-      a.href = url;
-      a.download = 'videoforge-export.' + ext;
+      const blob = new Blob(chunks,{type:mimeType});
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = 'videoforge-export.webm';
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      progress.classList.remove('visible');
-      bar.style.width = '0%';
+      overlay.classList.remove('visible');
+      bar.style.width='0%';
     };
 
-  } catch (err) {
+  } catch(err) {
     console.error(err);
-    progress.classList.remove('visible');
-    // Fallback: direct download original
-    fallbackDownload();
+    overlay.classList.remove('visible');
+    // fallback
+    const a=document.createElement('a');
+    a.href=S.videoURL;
+    a.download=S.videoFile?S.videoFile.name:'video';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
   }
 }
 
-function fallbackDownload() {
-  const a = document.createElement('a');
-  a.href = state.videoURL;
-  a.download = state.videoFile ? state.videoFile.name : 'video.mp4';
-  a.click();
-  document.getElementById('progress-label').textContent = '';
+/* ═══════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════ */
+function fmt(s) {
+  if(!s||isNaN(s)) return '0:00';
+  return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
+}
+function hexRgba(hex,a) {
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function setAll(id,val) {
+  document.querySelectorAll('#'+id).forEach(el=>el.textContent=val);
 }
 
-// ─────────────────────────────────────────
-//  HELPERS
-// ─────────────────────────────────────────
-function formatTime(s) {
-  if (!s || isNaN(s)) return '0:00';
-  const m = Math.floor(s / 60);
-  const sec = Math.floor(s % 60);
-  return m + ':' + String(sec).padStart(2,'0');
-}
-
-function hexToRgba(hex, alpha) {
-  const r = parseInt(hex.slice(1,3),16);
-  const g = parseInt(hex.slice(3,5),16);
-  const b = parseInt(hex.slice(5,7),16);
-  return `rgba(${r},${g},${b},${alpha})`;
-}
-
-// Keyboard shortcuts
+/* Keyboard shortcuts */
 document.addEventListener('keydown', e => {
-  if (!video.src) return;
-  if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
-  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
-  if (e.code === 'ArrowRight') seekBy(5);
-  if (e.code === 'ArrowLeft') seekBy(-5);
-  if (e.code === 'Home') seekTo(0);
-  if (e.code === 'End') seekEnd();
-  if (e.code === 'KeyM') toggleMute();
+  if(!video.src) return;
+  if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+  if(e.code==='Space'){e.preventDefault();togglePlay();}
+  if(e.code==='ArrowRight') seekBy(5);
+  if(e.code==='ArrowLeft')  seekBy(-5);
+  if(e.code==='Home') seekTo(0);
+  if(e.code==='End')  seekEnd();
+  if(e.code==='KeyM') toggleMute();
 });
 </script>
-
 </body>
 </html>
