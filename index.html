@@ -3,399 +3,1710 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Video Tools Pro</title>
-
+<title>VideoForge — محرر الفيديو</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a26;
+    --surface3: #22223a;
+    --accent: #7c3aed;
+    --accent2: #a855f7;
+    --accent3: #c084fc;
+    --neon: #00f5ff;
+    --neon2: #0ea5e9;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --success: #10b981;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #475569;
+    --border: rgba(124,58,237,0.25);
+    --border2: rgba(255,255,255,0.07);
+    --glow: 0 0 20px rgba(124,58,237,0.4);
+    --glow2: 0 0 40px rgba(124,58,237,0.2);
+    --radius: 12px;
+    --radius2: 8px;
+  }
 
-body{
-background:#050816;
-color:white;
-min-height:100vh;
-overflow-x:hidden;
-}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-.container{
-width:100%;
-max-width:1100px;
-margin:auto;
-padding:20px;
-}
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-.topbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:20px 0;
-}
+  /* Animated background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(124,58,237,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 80% 80%, rgba(0,245,255,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 30% 50% at 50% 50%, rgba(168,85,247,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
 
-.logo{
-font-size:30px;
-font-weight:bold;
-background:linear-gradient(45deg,#3b82f6,#06b6d4);
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-}
+  /* ─── HEADER ─── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 
-.mainBox{
-background:#0f172a;
-padding:20px;
-border-radius:30px;
-box-shadow:0 0 40px rgba(0,0,0,0.4);
-}
+  .logo {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
-.videoBox{
-position:relative;
-width:100%;
-overflow:hidden;
-border-radius:24px;
-background:black;
-}
+  .logo span {
+    color: var(--accent2);
+    text-shadow: 0 0 15px rgba(168,85,247,0.6);
+  }
 
-video{
-width:100%;
-max-height:520px;
-background:black;
-}
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--neon2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    box-shadow: var(--glow);
+  }
 
-.overlayText{
-position:absolute;
-top:20px;
-right:20px;
-background:rgba(0,0,0,0.5);
-padding:10px 16px;
-border-radius:14px;
-font-size:18px;
-}
+  .header-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text2);
+  }
 
-.buttons{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-gap:14px;
-margin-top:20px;
-}
+  .badge {
+    background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(0,245,255,0.15));
+    border: 1px solid rgba(124,58,237,0.4);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent3);
+    letter-spacing: 0.5px;
+  }
 
-button,
-.uploadBtn{
-padding:16px;
-border:none;
-border-radius:18px;
-background:#2563eb;
-color:white;
-font-size:15px;
-font-weight:bold;
-cursor:pointer;
-transition:0.3s;
-display:flex;
-align-items:center;
-justify-content:center;
-}
+  /* ─── LAYOUT ─── */
+  .app-layout {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 280px 1fr 260px;
+    grid-template-rows: auto 1fr auto;
+    height: calc(100vh - 60px);
+    overflow: hidden;
+  }
 
-button:hover,
-.uploadBtn:hover{
-background:#1d4ed8;
-transform:translateY(-2px);
-}
+  /* ─── UPLOAD ZONE ─── */
+  .upload-section {
+    grid-column: 1 / -1;
+    padding: 20px;
+    display: none;
+  }
 
-.panel{
-margin-top:25px;
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-gap:18px;
-}
+  .upload-section.visible { display: block; }
 
-.card{
-background:#111827;
-padding:20px;
-border-radius:22px;
-}
+  .drop-zone {
+    border: 2px dashed rgba(124,58,237,0.4);
+    border-radius: 20px;
+    background: rgba(124,58,237,0.04);
+    padding: 60px 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
 
-.card h3{
-margin-bottom:14px;
-font-size:18px;
-}
+  .drop-zone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 50% 60% at 50% 50%, rgba(124,58,237,0.06) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
 
-.card input,
-.card select{
-width:100%;
-padding:14px;
-border:none;
-border-radius:14px;
-background:#1e293b;
-color:white;
-margin-top:10px;
-}
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--accent2);
+    background: rgba(124,58,237,0.08);
+    box-shadow: 0 0 40px rgba(124,58,237,0.15), inset 0 0 40px rgba(124,58,237,0.05);
+  }
 
-.progress{
-width:100%;
-height:14px;
-background:#1e293b;
-border-radius:20px;
-overflow:hidden;
-margin-top:18px;
-}
+  .drop-zone:hover::before, .drop-zone.drag-over::before { opacity: 1; }
 
-.progressBar{
-width:0%;
-height:100%;
-background:linear-gradient(45deg,#3b82f6,#06b6d4);
-transition:0.3s;
-}
+  .upload-icon {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(0,245,255,0.1));
+    border: 2px solid rgba(124,58,237,0.3);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 32px;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
 
-.status{
-margin-top:12px;
-font-size:15px;
-color:#cbd5e1;
-}
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(124,58,237,0.3); }
+    50% { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(124,58,237,0); }
+  }
 
-.toolsGrid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-gap:16px;
-margin-top:25px;
-}
+  .drop-zone h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .drop-zone p { color: var(--text2); font-size: 14px; margin-bottom: 24px; }
 
-.toolCard{
-background:#111827;
-padding:18px;
-border-radius:20px;
-transition:0.3s;
-}
+  .upload-btn {
+    background: linear-gradient(135deg, var(--accent), var(--neon2));
+    border: none;
+    color: white;
+    padding: 12px 32px;
+    border-radius: 10px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+  }
 
-.toolCard:hover{
-transform:scale(1.03);
-background:#1e293b;
-}
+  .upload-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(124,58,237,0.5);
+  }
 
-.toolCard h4{
-margin-bottom:10px;
-}
+  .supported-formats {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--text3);
+  }
 
-@media(max-width:700px){
-.logo{
-font-size:24px;
-}
-}
+  /* ─── EDITOR LAYOUT ─── */
+  .editor-wrapper {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 260px 1fr 270px;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* ─── LEFT PANEL ─── */
+  .panel-left {
+    background: var(--surface);
+    border-left: 1px solid var(--border2);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .panel-section {
+    border-bottom: 1px solid var(--border2);
+    padding: 16px;
+  }
+
+  .panel-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent3);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(124,58,237,0.3), transparent);
+  }
+
+  /* Controls */
+  .control-group { margin-bottom: 14px; }
+
+  .control-label {
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .control-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    color: var(--accent3);
+    font-weight: 600;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 4px;
+    background: var(--surface3);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    background: linear-gradient(135deg, var(--accent), var(--neon2));
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(124,58,237,0.6);
+    transition: transform 0.2s;
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+  .time-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .time-input-wrap { display: flex; flex-direction: column; gap: 4px; }
+  .time-input-wrap label { font-size: 11px; color: var(--text3); }
+
+  .time-input {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius2);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 10px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+    text-align: center;
+  }
+
+  .time-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(124,58,237,0.15); }
+
+  /* Toggle buttons */
+  .toggle-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .toggle-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius2);
+    color: var(--text2);
+    font-family: 'Cairo', sans-serif;
+    font-size: 12px;
+    padding: 8px 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .toggle-btn:hover { background: var(--surface3); color: var(--text); }
+  .toggle-btn.active {
+    background: rgba(124,58,237,0.2);
+    border-color: var(--accent);
+    color: var(--accent3);
+    box-shadow: 0 0 10px rgba(124,58,237,0.2);
+  }
+
+  /* Rotate buttons */
+  .rotate-btns {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .icon-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius2);
+    color: var(--text2);
+    font-size: 16px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .icon-btn:hover {
+    background: rgba(124,58,237,0.15);
+    border-color: var(--accent);
+    color: var(--accent3);
+  }
+
+  /* ─── CENTER ─── */
+  .panel-center {
+    background: #070709;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Video container */
+  .video-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .video-wrapper {
+    position: relative;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05);
+  }
+
+  video {
+    display: block;
+    max-width: 100%;
+    max-height: calc(100vh - 300px);
+    border-radius: 10px;
+    background: #000;
+  }
+
+  /* Video overlay effects */
+  .video-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    pointer-events: none;
+    transition: all 0.3s;
+  }
+
+  /* Filter previews on video */
+  video.filter-grayscale { filter: grayscale(100%); }
+  video.filter-sepia { filter: sepia(80%); }
+  video.filter-invert { filter: invert(100%); }
+  video.filter-blur { filter: blur(2px); }
+  video.filter-saturate { filter: saturate(200%); }
+  video.filter-vintage { filter: sepia(40%) contrast(1.1) brightness(0.95); }
+  video.filter-cool { filter: hue-rotate(30deg) saturate(120%); }
+  video.filter-warm { filter: hue-rotate(-15deg) saturate(130%) brightness(1.05); }
+
+  /* ─── CONTROLS BAR ─── */
+  .controls-bar {
+    background: var(--surface);
+    border-top: 1px solid var(--border2);
+    padding: 14px 20px;
+  }
+
+  /* Timeline */
+  .timeline-wrap {
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  #timeline {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 6px;
+    background: var(--surface3);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+  }
+
+  #timeline::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    background: white;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(124,58,237,0.8), 0 2px 6px rgba(0,0,0,0.4);
+    border: 2px solid var(--accent2);
+  }
+
+  .trim-range {
+    position: absolute;
+    top: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--accent), var(--neon2));
+    border-radius: 3px;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.6;
+  }
+
+  .time-display {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+
+  /* Playback controls */
+  .playback-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 10px;
+  }
+
+  .play-btn {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--accent), var(--neon2));
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(124,58,237,0.5);
+    flex-shrink: 0;
+  }
+
+  .play-btn:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(124,58,237,0.6); }
+
+  .ctrl-btn {
+    width: 36px; height: 36px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text2);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .ctrl-btn:hover { background: var(--surface3); color: var(--text); border-color: rgba(124,58,237,0.3); }
+
+  .speed-selector {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    font-size: 13px;
+    padding: 6px 10px;
+    cursor: pointer;
+    outline: none;
+  }
+
+  /* ─── RIGHT PANEL ─── */
+  .panel-right {
+    background: var(--surface);
+    border-right: 1px solid var(--border2);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Color inputs */
+  .color-picker-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  input[type="color"] {
+    width: 36px; height: 36px;
+    border: 2px solid var(--border2);
+    border-radius: 8px;
+    background: none;
+    cursor: pointer;
+    padding: 2px;
+  }
+
+  .color-presets {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .color-preset {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .color-preset:hover, .color-preset.active { border-color: white; transform: scale(1.15); }
+
+  /* Text overlay */
+  .text-input {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius2);
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    font-size: 13px;
+    padding: 9px 12px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: none;
+  }
+
+  .text-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(124,58,237,0.12); }
+
+  /* Filter grid */
+  .filter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .filter-item {
+    background: var(--surface2);
+    border: 2px solid var(--border2);
+    border-radius: var(--radius2);
+    padding: 10px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .filter-item:hover { border-color: rgba(124,58,237,0.4); color: var(--text); }
+  .filter-item.active { border-color: var(--accent); background: rgba(124,58,237,0.15); color: var(--accent3); }
+  .filter-icon { font-size: 18px; margin-bottom: 4px; }
+
+  /* ─── DOWNLOAD SECTION ─── */
+  .download-panel {
+    grid-column: 1 / -1;
+    background: var(--surface);
+    border-top: 1px solid var(--border2);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .format-select {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius2);
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    font-size: 13px;
+    padding: 8px 14px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .quality-select {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius2);
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    font-size: 13px;
+    padding: 8px 14px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .download-btn {
+    background: linear-gradient(135deg, var(--success), #059669);
+    border: none;
+    color: white;
+    padding: 10px 28px;
+    border-radius: 10px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 18px rgba(16,185,129,0.35);
+    margin-right: auto;
+  }
+
+  .download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 26px rgba(16,185,129,0.5);
+  }
+
+  .download-btn:disabled {
+    background: var(--surface3);
+    color: var(--text3);
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .video-info {
+    font-size: 12px;
+    color: var(--text3);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .video-info span { color: var(--text2); }
+
+  /* ─── PROGRESS ─── */
+  .export-progress {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    display: none;
+  }
+
+  .export-progress.visible { display: flex; }
+
+  .progress-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 50px;
+    text-align: center;
+    min-width: 320px;
+    box-shadow: var(--glow2);
+  }
+
+  .progress-spinner {
+    width: 60px; height: 60px;
+    border: 3px solid var(--surface3);
+    border-top-color: var(--accent2);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .progress-bar-wrap {
+    background: var(--surface2);
+    border-radius: 10px;
+    height: 8px;
+    overflow: hidden;
+    margin-top: 16px;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--neon));
+    border-radius: 10px;
+    transition: width 0.3s;
+    width: 0%;
+  }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(124,58,237,0.4); }
+
+  /* ─── NOTICE ─── */
+  .notice {
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: var(--radius2);
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--warn);
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+
+  /* ─── TEXT OVERLAY ON VIDEO ─── */
+  .text-overlay {
+    position: absolute;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+    cursor: move;
+    user-select: none;
+    z-index: 10;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  /* ─── CROP OVERLAY ─── */
+  .crop-overlay {
+    position: absolute;
+    inset: 0;
+    display: none;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .crop-overlay.active { display: block; }
+
+  .crop-box {
+    position: absolute;
+    border: 2px solid var(--neon);
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+    cursor: move;
+    pointer-events: all;
+  }
+
+  /* Flip animation */
+  .flip-h { transform: scaleX(-1); }
+  .flip-v { transform: scaleY(-1); }
+  .flip-hv { transform: scaleX(-1) scaleY(-1); }
+
+  /* ─── MINI WAVEFORM ─── */
+  .waveform-wrap {
+    width: 100%;
+    height: 40px;
+    background: var(--surface2);
+    border-radius: var(--radius2);
+    overflow: hidden;
+    position: relative;
+    margin-top: 8px;
+  }
+
+  canvas#waveform {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ─── STAT CHIPS ─── */
+  .stat-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .stat-chip {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .stat-chip .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .editor-wrapper { grid-template-columns: 1fr; }
+    .panel-left, .panel-right { display: none; }
+  }
 </style>
 </head>
 <body>
 
-<div class="container">
+<header>
+  <div class="logo">
+    <div class="logo-icon">🎬</div>
+    Video<span>Forge</span>
+  </div>
+  <div class="header-info">
+    <div id="file-name-display" style="font-size:13px; color: var(--text2);">لا يوجد فيديو محمّل</div>
+    <div class="badge">محرر الفيديو</div>
+  </div>
+</header>
 
-<div class="topbar">
-<div class="logo">Video Tools Pro</div>
+<!-- MAIN APP -->
+<div class="app-layout" id="app">
+
+  <!-- UPLOAD ZONE -->
+  <div class="upload-section visible" id="upload-section">
+    <div class="drop-zone" id="drop-zone">
+      <div class="upload-icon">🎬</div>
+      <h2>ارفع فيديوك هنا</h2>
+      <p>اسحب وأفلت الفيديو، أو اضغط للاختيار من الجهاز</p>
+      <button class="upload-btn" onclick="document.getElementById('file-input').click()">
+        📁 اختر فيديو
+      </button>
+      <div class="supported-formats">يدعم: MP4 · WebM · MOV · AVI · MKV · OGG</div>
+      <input type="file" id="file-input" accept="video/*" style="display:none">
+    </div>
+  </div>
+
+  <!-- EDITOR (hidden until video loaded) -->
+  <div class="editor-wrapper" id="editor-wrapper" style="display:none;">
+
+    <!-- LEFT PANEL -->
+    <div class="panel-left">
+
+      <!-- CUT / TRIM -->
+      <div class="panel-section">
+        <div class="panel-title">✂️ قص الفيديو</div>
+        <div class="time-inputs">
+          <div class="time-input-wrap">
+            <label>من (ثانية)</label>
+            <input type="number" class="time-input" id="trim-start" value="0" min="0" step="0.1">
+          </div>
+          <div class="time-input-wrap">
+            <label>إلى (ثانية)</label>
+            <input type="number" class="time-input" id="trim-end" value="0" min="0" step="0.1">
+          </div>
+        </div>
+        <div class="notice" style="margin-top:10px;">
+          💡 يُطبّق القص عند التصدير. استخدم المشغّل لمعاينة النطاق.
+        </div>
+      </div>
+
+      <!-- AUDIO -->
+      <div class="panel-section">
+        <div class="panel-title">🔊 الصوت</div>
+        <div class="control-group">
+          <div class="control-label">
+            <span>مستوى الصوت</span>
+            <span class="control-value" id="vol-val">100%</span>
+          </div>
+          <input type="range" id="volume" min="0" max="200" value="100">
+        </div>
+        <div class="control-group">
+          <div class="control-label">
+            <span>صوت الباس</span>
+            <span class="control-value" id="bass-val">0</span>
+          </div>
+          <input type="range" id="bass" min="-10" max="10" value="0">
+        </div>
+        <div class="control-group">
+          <div class="control-label">
+            <span>صوت الحدة</span>
+            <span class="control-value" id="treble-val">0</span>
+          </div>
+          <input type="range" id="treble" min="-10" max="10" value="0">
+        </div>
+        <div class="toggle-row">
+          <button class="toggle-btn" id="mute-btn" onclick="toggleMute()">🔇 كتم</button>
+          <button class="toggle-btn" id="reverse-audio-btn" onclick="toggleReverseAudio()">🔄 عكس الصوت</button>
+        </div>
+      </div>
+
+      <!-- ROTATION / FLIP -->
+      <div class="panel-section">
+        <div class="panel-title">🔄 التدوير والقلب</div>
+        <div class="control-group">
+          <div class="control-label">
+            <span>زاوية التدوير</span>
+            <span class="control-value" id="rotate-val">0°</span>
+          </div>
+          <input type="range" id="rotate" min="0" max="360" value="0">
+        </div>
+        <div class="rotate-btns" style="margin-top:8px;">
+          <button class="icon-btn" title="تدوير 90° يسار" onclick="setRotate(-90)">↺</button>
+          <button class="icon-btn" title="تدوير 90° يمين" onclick="setRotate(90)">↻</button>
+          <button class="icon-btn" title="قلب أفقي" onclick="toggleFlip('h')">⇆</button>
+          <button class="icon-btn" title="قلب عمودي" onclick="toggleFlip('v')">⇅</button>
+        </div>
+      </div>
+
+      <!-- SPEED -->
+      <div class="panel-section">
+        <div class="panel-title">⚡ السرعة</div>
+        <div class="control-group">
+          <div class="control-label">
+            <span>سرعة التشغيل</span>
+            <span class="control-value" id="speed-val">1×</span>
+          </div>
+          <input type="range" id="speed-range" min="0.25" max="4" step="0.25" value="1">
+        </div>
+        <div class="toggle-row">
+          <button class="toggle-btn" onclick="setSpeed(0.5)">0.5×</button>
+          <button class="toggle-btn" onclick="setSpeed(1)">1×</button>
+          <button class="toggle-btn" onclick="setSpeed(1.5)">1.5×</button>
+          <button class="toggle-btn" onclick="setSpeed(2)">2×</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CENTER: VIDEO + CONTROLS -->
+    <div class="panel-center">
+      <div class="video-container">
+        <div class="video-wrapper" id="video-wrapper">
+          <video id="main-video" playsinline></video>
+          <div class="text-overlay" id="text-overlay" style="display:none;"></div>
+        </div>
+      </div>
+
+      <!-- TIMELINE + CONTROLS -->
+      <div class="controls-bar">
+        <div class="timeline-wrap">
+          <div class="trim-range" id="trim-range"></div>
+          <input type="range" id="timeline" min="0" max="100" value="0" step="0.1">
+        </div>
+        <div class="time-display">
+          <span id="current-time-display">0:00</span>
+          <span id="duration-display">0:00</span>
+        </div>
+        <div class="playback-row">
+          <button class="ctrl-btn" title="إلى البداية" onclick="seekTo(0)">⏮</button>
+          <button class="ctrl-btn" title="تراجع 5 ثوان" onclick="seekBy(-5)">⏪</button>
+          <button class="play-btn" id="play-btn" onclick="togglePlay()">▶</button>
+          <button class="ctrl-btn" title="تقدم 5 ثوان" onclick="seekBy(5)">⏩</button>
+          <button class="ctrl-btn" title="نهاية" onclick="seekEnd()">⏭</button>
+          <select class="speed-selector" onchange="setSpeed(parseFloat(this.value))">
+            <option value="0.25">0.25×</option>
+            <option value="0.5">0.5×</option>
+            <option value="0.75">0.75×</option>
+            <option value="1" selected>1×</option>
+            <option value="1.25">1.25×</option>
+            <option value="1.5">1.5×</option>
+            <option value="2">2×</option>
+            <option value="4">4×</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="panel-right">
+
+      <!-- VIDEO INFO -->
+      <div class="panel-section">
+        <div class="panel-title">📊 معلومات الفيديو</div>
+        <div class="stat-row">
+          <div class="stat-chip"><div class="dot"></div><span id="info-duration">0:00</span></div>
+          <div class="stat-chip"><div class="dot" style="background:var(--neon)"></div><span id="info-res">--</span></div>
+          <div class="stat-chip"><div class="dot" style="background:var(--warn)"></div><span id="info-size">--</span></div>
+        </div>
+      </div>
+
+      <!-- BRIGHTNESS / CONTRAST -->
+      <div class="panel-section">
+        <div class="panel-title">☀️ الصورة</div>
+        <div class="control-group">
+          <div class="control-label">
+            <span>السطوع</span>
+            <span class="control-value" id="bright-val">100%</span>
+          </div>
+          <input type="range" id="brightness" min="0" max="200" value="100">
+        </div>
+        <div class="control-group">
+          <div class="control-label">
+            <span>التباين</span>
+            <span class="control-value" id="contrast-val">100%</span>
+          </div>
+          <input type="range" id="contrast" min="0" max="200" value="100">
+        </div>
+        <div class="control-group">
+          <div class="control-label">
+            <span>التشبع</span>
+            <span class="control-value" id="saturate-val">100%</span>
+          </div>
+          <input type="range" id="saturate" min="0" max="300" value="100">
+        </div>
+        <div class="control-group">
+          <div class="control-label">
+            <span>درجة الألوان</span>
+            <span class="control-value" id="hue-val">0°</span>
+          </div>
+          <input type="range" id="hue" min="0" max="360" value="0">
+        </div>
+        <div class="control-group">
+          <div class="control-label">
+            <span>الضبابية</span>
+            <span class="control-value" id="blur-val">0px</span>
+          </div>
+          <input type="range" id="blur" min="0" max="10" value="0" step="0.5">
+        </div>
+        <button class="toggle-btn" style="width:100%;margin-top:4px;" onclick="resetFilters()">🔄 إعادة تعيين</button>
+      </div>
+
+      <!-- FILTERS -->
+      <div class="panel-section">
+        <div class="panel-title">🎨 فلاتر</div>
+        <div class="filter-grid">
+          <div class="filter-item active" onclick="applyFilter('none', this)">
+            <div class="filter-icon">🎬</div>عادي
+          </div>
+          <div class="filter-item" onclick="applyFilter('grayscale', this)">
+            <div class="filter-icon">⬛</div>أبيض وأسود
+          </div>
+          <div class="filter-item" onclick="applyFilter('sepia', this)">
+            <div class="filter-icon">🟤</div>كلاسيكي
+          </div>
+          <div class="filter-item" onclick="applyFilter('vintage', this)">
+            <div class="filter-icon">📷</div>فينتاج
+          </div>
+          <div class="filter-item" onclick="applyFilter('cool', this)">
+            <div class="filter-icon">🔵</div>بارد
+          </div>
+          <div class="filter-item" onclick="applyFilter('warm', this)">
+            <div class="filter-icon">🟠</div>دافئ
+          </div>
+          <div class="filter-item" onclick="applyFilter('saturate', this)">
+            <div class="filter-icon">🌈</div>حيوي
+          </div>
+          <div class="filter-item" onclick="applyFilter('invert', this)">
+            <div class="filter-icon">🔄</div>عكسي
+          </div>
+        </div>
+      </div>
+
+      <!-- TEXT OVERLAY -->
+      <div class="panel-section">
+        <div class="panel-title">📝 نص على الفيديو</div>
+        <div class="control-group">
+          <textarea class="text-input" id="overlay-text" rows="2" placeholder="اكتب النص هنا..."></textarea>
+        </div>
+        <div class="control-group">
+          <div class="control-label"><span>حجم الخط</span><span class="control-value" id="font-size-val">24px</span></div>
+          <input type="range" id="font-size" min="12" max="72" value="24">
+        </div>
+        <div class="color-picker-row" style="margin-bottom:8px;">
+          <label style="font-size:12px; color:var(--text2);">لون النص</label>
+          <input type="color" id="text-color" value="#ffffff">
+        </div>
+        <div class="color-picker-row" style="margin-bottom:8px;">
+          <label style="font-size:12px; color:var(--text2);">خلفية النص</label>
+          <input type="color" id="text-bg" value="#000000">
+          <input type="range" id="text-bg-opacity" min="0" max="100" value="50" style="flex:1;">
+        </div>
+        <button class="toggle-btn" style="width:100%;" onclick="applyTextOverlay()">✅ تطبيق النص</button>
+        <button class="toggle-btn" style="width:100%; margin-top:6px;" onclick="removeTextOverlay()">❌ إزالة النص</button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- DOWNLOAD PANEL -->
+  <div class="download-panel" id="download-panel" style="display:none;">
+    <div class="video-info">
+      <div>📁 الملف: <span id="dl-filename">--</span></div>
+      <div>⏱ المدة: <span id="dl-duration">--</span></div>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+      <label style="font-size:13px; color:var(--text2);">الصيغة:</label>
+      <select class="format-select" id="format-select">
+        <option value="mp4">MP4</option>
+        <option value="webm">WebM</option>
+      </select>
+      <label style="font-size:13px; color:var(--text2);">الجودة:</label>
+      <select class="quality-select" id="quality-select">
+        <option value="high">عالية</option>
+        <option value="medium" selected>متوسطة</option>
+        <option value="low">منخفضة</option>
+      </select>
+    </div>
+    <button class="download-btn" id="download-btn" onclick="exportVideo()">
+      ⬇️ تنزيل الفيديو
+    </button>
+  </div>
+
 </div>
 
-<div class="mainBox">
-
-<div class="videoBox">
-<video id="videoPlayer" controls></video>
-<div class="overlayText" id="overlayPreview">النص يظهر هنا</div>
-</div>
-
-<div class="buttons">
-
-<label for="videoUpload" class="uploadBtn">
-رفع فيديو
-</label>
-
-<input type="file" id="videoUpload" accept="video/*" hidden>
-
-<button onclick="toggleMute()">إزالة / إعادة الصوت</button>
-<button onclick="downloadVideo()">تنزيل الفيديو</button>
-<button onclick="toggleTheme()">تغيير الخلفية</button>
-<button onclick="fullscreenVideo()">ملء الشاشة</button>
-<button onclick="rewindVideo()">-10 ثواني</button>
-<button onclick="forwardVideo()">+10 ثواني</button>
-
-</div>
-
-<div class="panel">
-
-<div class="card">
-<h3>سرعة الفيديو</h3>
-<input type="range" min="0.25" max="3" step="0.25" value="1" id="speedControl">
-</div>
-
-<div class="card">
-<h3>سطوع الفيديو</h3>
-<input type="range" min="50" max="200" value="100" id="brightnessControl">
-</div>
-
-<div class="card">
-<h3>إضافة نص</h3>
-<input type="text" id="textInput" placeholder="اكتب النص هنا">
-</div>
-
-<div class="card">
-<h3>تدوير الفيديو</h3>
-<select id="rotateControl">
-<option value="0">بدون تدوير</option>
-<option value="90">90 درجة</option>
-<option value="180">180 درجة</option>
-<option value="270">270 درجة</option>
-</select>
-</div>
-
-</div>
-
-<div class="progress">
-<div class="progressBar" id="progressBar"></div>
-</div>
-
-<div class="status" id="statusText">
-جاهز
-</div>
-
-<div class="toolsGrid">
-
-<div class="toolCard">
-<h4>قص الفيديو</h4>
-<p>تحديد جزء من الفيديو بسهولة.</p>
-</div>
-
-<div class="toolCard">
-<h4>إزالة الصوت</h4>
-<p>كتم الفيديو بضغطة واحدة.</p>
-</div>
-
-<div class="toolCard">
-<h4>إضافة نص</h4>
-<p>كتابة نص فوق الفيديو.</p>
-</div>
-
-<div class="toolCard">
-<h4>سرعة الفيديو</h4>
-<p>تسريع أو إبطاء الفيديو.</p>
-</div>
-
-</div>
-
-</div>
-
+<!-- EXPORT PROGRESS OVERLAY -->
+<div class="export-progress" id="export-progress">
+  <div class="progress-box">
+    <div class="progress-spinner"></div>
+    <h3 style="font-size:18px; margin-bottom:8px;">جارٍ تصدير الفيديو...</h3>
+    <p style="color:var(--text2); font-size:13px;" id="progress-label">يُرجى الانتظار</p>
+    <div class="progress-bar-wrap" style="margin-top:16px;">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <p style="color:var(--text3); font-size:11px; margin-top:12px;">
+      التصدير يعتمد على قدرات المتصفح
+    </p>
+  </div>
 </div>
 
 <script>
+// ─────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────
+const state = {
+  videoFile: null,
+  videoURL: null,
+  duration: 0,
+  trimStart: 0,
+  trimEnd: 0,
+  volume: 1,
+  playbackRate: 1,
+  rotation: 0,
+  flipH: false,
+  flipV: false,
+  isMuted: false,
+  filter: 'none',
+  brightness: 100,
+  contrast: 100,
+  saturate: 100,
+  hue: 0,
+  blur: 0,
+  textContent: '',
+  reverseAudio: false
+};
 
-const video = document.getElementById('videoPlayer');
-const upload = document.getElementById('videoUpload');
-const speedControl = document.getElementById('speedControl');
-const brightnessControl = document.getElementById('brightnessControl');
-const rotateControl = document.getElementById('rotateControl');
-const textInput = document.getElementById('textInput');
-const overlayPreview = document.getElementById('overlayPreview');
-const progressBar = document.getElementById('progressBar');
-const statusText = document.getElementById('statusText');
+const video = document.getElementById('main-video');
 
-let currentVideoURL = '';
-let darkMode = true;
+// ─────────────────────────────────────────
+//  UPLOAD
+// ─────────────────────────────────────────
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
 
-upload.addEventListener('change', function(e){
-
-const file = e.target.files[0];
-
-if(file){
-
-currentVideoURL = URL.createObjectURL(file);
-video.src = currentVideoURL;
-video.load();
-
-statusText.innerText = 'تم رفع الفيديو';
-
-}
-
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('video/')) loadVideo(file);
 });
 
-speedControl.addEventListener('input', ()=>{
-video.playbackRate = speedControl.value;
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) loadVideo(e.target.files[0]);
 });
 
-brightnessControl.addEventListener('input', ()=>{
-video.style.filter = `brightness(${brightnessControl.value}%)`;
+function loadVideo(file) {
+  state.videoFile = file;
+  state.videoURL = URL.createObjectURL(file);
+  video.src = state.videoURL;
+
+  document.getElementById('upload-section').classList.remove('visible');
+  document.getElementById('upload-section').style.display = 'none';
+  document.getElementById('editor-wrapper').style.display = 'grid';
+  document.getElementById('download-panel').style.display = 'flex';
+
+  document.getElementById('file-name-display').textContent = file.name;
+  document.getElementById('dl-filename').textContent = file.name;
+
+  const sizeMB = (file.size / 1048576).toFixed(2);
+  document.getElementById('info-size').textContent = sizeMB + ' MB';
+
+  video.addEventListener('loadedmetadata', () => {
+    state.duration = video.duration;
+    state.trimEnd = video.duration;
+
+    document.getElementById('trim-end').value = video.duration.toFixed(1);
+    document.getElementById('trim-end').max = video.duration;
+    document.getElementById('trim-start').max = video.duration;
+
+    document.getElementById('timeline').max = video.duration;
+    document.getElementById('duration-display').textContent = formatTime(video.duration);
+    document.getElementById('info-duration').textContent = formatTime(video.duration);
+    document.getElementById('dl-duration').textContent = formatTime(video.duration);
+
+    document.getElementById('info-res').textContent = video.videoWidth + '×' + video.videoHeight;
+
+    updateTrimRange();
+  }, { once: true });
+}
+
+// ─────────────────────────────────────────
+//  PLAYBACK
+// ─────────────────────────────────────────
+function togglePlay() {
+  if (video.paused) {
+    video.play();
+    document.getElementById('play-btn').textContent = '⏸';
+  } else {
+    video.pause();
+    document.getElementById('play-btn').textContent = '▶';
+  }
+}
+
+function seekTo(t) { video.currentTime = t; }
+function seekBy(s) { video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + s)); }
+function seekEnd() { video.currentTime = video.duration; }
+
+video.addEventListener('timeupdate', () => {
+  const t = video.currentTime;
+  document.getElementById('timeline').value = t;
+  document.getElementById('current-time-display').textContent = formatTime(t);
+
+  // Auto-stop at trim end
+  if (t >= state.trimEnd && state.trimEnd > 0) {
+    video.pause();
+    document.getElementById('play-btn').textContent = '▶';
+  }
 });
 
-rotateControl.addEventListener('change', ()=>{
-video.style.transform = `rotate(${rotateControl.value}deg)`;
+video.addEventListener('ended', () => {
+  document.getElementById('play-btn').textContent = '▶';
 });
 
-textInput.addEventListener('input', ()=>{
-overlayPreview.innerText = textInput.value;
+document.getElementById('timeline').addEventListener('input', e => {
+  video.currentTime = parseFloat(e.target.value);
 });
 
-function toggleMute(){
-video.muted = !video.muted;
-statusText.innerText = 'تم تغيير حالة الصوت';
+// ─────────────────────────────────────────
+//  SPEED
+// ─────────────────────────────────────────
+function setSpeed(v) {
+  state.playbackRate = v;
+  video.playbackRate = v;
+  document.getElementById('speed-val').textContent = v + '×';
+  document.getElementById('speed-range').value = v;
 }
 
-function downloadVideo(){
+document.getElementById('speed-range').addEventListener('input', e => {
+  setSpeed(parseFloat(e.target.value));
+});
 
-if(currentVideoURL === ''){
-statusText.innerText = 'قم برفع فيديو أولا';
-return;
+// ─────────────────────────────────────────
+//  VOLUME
+// ─────────────────────────────────────────
+document.getElementById('volume').addEventListener('input', e => {
+  const v = parseInt(e.target.value);
+  state.volume = v / 100;
+  video.volume = Math.min(1, v / 100);
+  document.getElementById('vol-val').textContent = v + '%';
+});
+
+function toggleMute() {
+  state.isMuted = !state.isMuted;
+  video.muted = state.isMuted;
+  const btn = document.getElementById('mute-btn');
+  btn.classList.toggle('active', state.isMuted);
+  btn.textContent = state.isMuted ? '🔕 مكتوم' : '🔇 كتم';
 }
 
-simulateProgress();
-
-const a = document.createElement('a');
-a.href = currentVideoURL;
-a.download = 'video.mp4';
-a.click();
-
+function toggleReverseAudio() {
+  state.reverseAudio = !state.reverseAudio;
+  document.getElementById('reverse-audio-btn').classList.toggle('active', state.reverseAudio);
 }
 
-function toggleTheme(){
+document.getElementById('bass').addEventListener('input', e => {
+  document.getElementById('bass-val').textContent = e.target.value;
+});
+document.getElementById('treble').addEventListener('input', e => {
+  document.getElementById('treble-val').textContent = e.target.value;
+});
 
-if(darkMode){
-document.body.style.background = '#f1f5f9';
-document.body.style.color = 'black';
-darkMode = false;
-}else{
-document.body.style.background = '#050816';
-document.body.style.color = 'white';
-darkMode = true;
+// ─────────────────────────────────────────
+//  TRIM
+// ─────────────────────────────────────────
+document.getElementById('trim-start').addEventListener('input', e => {
+  state.trimStart = parseFloat(e.target.value) || 0;
+  updateTrimRange();
+});
+
+document.getElementById('trim-end').addEventListener('input', e => {
+  state.trimEnd = parseFloat(e.target.value) || state.duration;
+  updateTrimRange();
+});
+
+function updateTrimRange() {
+  if (!state.duration) return;
+  const startPct = (state.trimStart / state.duration) * 100;
+  const endPct = (state.trimEnd / state.duration) * 100;
+  const range = document.getElementById('trim-range');
+  range.style.left = startPct + '%';
+  range.style.width = (endPct - startPct) + '%';
 }
 
+// ─────────────────────────────────────────
+//  ROTATION & FLIP
+// ─────────────────────────────────────────
+document.getElementById('rotate').addEventListener('input', e => {
+  state.rotation = parseInt(e.target.value);
+  document.getElementById('rotate-val').textContent = state.rotation + '°';
+  applyTransform();
+});
+
+function setRotate(deg) {
+  state.rotation = ((state.rotation + deg) % 360 + 360) % 360;
+  document.getElementById('rotate').value = state.rotation;
+  document.getElementById('rotate-val').textContent = state.rotation + '°';
+  applyTransform();
 }
 
-function fullscreenVideo(){
-if(video.requestFullscreen){
-video.requestFullscreen();
-}
-}
-
-function rewindVideo(){
-video.currentTime -= 10;
+function toggleFlip(dir) {
+  if (dir === 'h') state.flipH = !state.flipH;
+  if (dir === 'v') state.flipV = !state.flipV;
+  applyTransform();
 }
 
-function forwardVideo(){
-video.currentTime += 10;
+function applyTransform() {
+  const sx = state.flipH ? -1 : 1;
+  const sy = state.flipV ? -1 : 1;
+  video.style.transform = `rotate(${state.rotation}deg) scale(${sx}, ${sy})`;
 }
 
-function simulateProgress(){
+// ─────────────────────────────────────────
+//  IMAGE ADJUSTMENTS
+// ─────────────────────────────────────────
+function updateVideoFilter() {
+  const filterMap = {
+    'none': '',
+    'grayscale': 'grayscale(100%)',
+    'sepia': 'sepia(80%)',
+    'invert': 'invert(100%)',
+    'blur': 'blur(2px)',
+    'saturate': 'saturate(200%)',
+    'vintage': 'sepia(40%) contrast(1.1) brightness(0.95)',
+    'cool': 'hue-rotate(30deg) saturate(120%)',
+    'warm': 'hue-rotate(-15deg) saturate(130%) brightness(1.05)'
+  };
 
-let width = 0;
-progressBar.style.width = '0%';
-statusText.innerText = 'جارِ تجهيز الفيديو...';
-
-const interval = setInterval(()=>{
-
-width += 5;
-progressBar.style.width = width + '%';
-
-if(width >= 100){
-clearInterval(interval);
-statusText.innerText = 'تم تجهيز الفيديو';
+  const base = filterMap[state.filter] || '';
+  const adj = `brightness(${state.brightness}%) contrast(${state.contrast}%) saturate(${state.saturate}%) hue-rotate(${state.hue}deg) blur(${state.blur}px)`;
+  video.style.filter = base + ' ' + adj;
 }
 
-},150);
+['brightness','contrast','saturate','hue','blur'].forEach(id => {
+  document.getElementById(id).addEventListener('input', e => {
+    const v = parseFloat(e.target.value);
+    state[id] = v;
+    const unit = id === 'hue' ? '°' : id === 'blur' ? 'px' : '%';
+    document.getElementById(id.replace('saturate','saturate') + '-val').textContent = v + unit;
+    updateVideoFilter();
+  });
+});
 
+// Fix label IDs
+document.getElementById('brightness').addEventListener('input', e => {
+  document.getElementById('bright-val').textContent = e.target.value + '%';
+});
+document.getElementById('contrast').addEventListener('input', e => {
+  document.getElementById('contrast-val').textContent = e.target.value + '%';
+});
+document.getElementById('saturate').addEventListener('input', e => {
+  document.getElementById('saturate-val').textContent = e.target.value + '%';
+});
+document.getElementById('hue').addEventListener('input', e => {
+  document.getElementById('hue-val').textContent = e.target.value + '°';
+});
+document.getElementById('blur').addEventListener('input', e => {
+  document.getElementById('blur-val').textContent = e.target.value + 'px';
+  state.blur = parseFloat(e.target.value);
+  updateVideoFilter();
+});
+
+function applyFilter(name, el) {
+  document.querySelectorAll('.filter-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  state.filter = name;
+  updateVideoFilter();
 }
 
+function resetFilters() {
+  state.brightness = 100;
+  state.contrast = 100;
+  state.saturate = 100;
+  state.hue = 0;
+  state.blur = 0;
+  document.getElementById('brightness').value = 100;
+  document.getElementById('contrast').value = 100;
+  document.getElementById('saturate').value = 100;
+  document.getElementById('hue').value = 0;
+  document.getElementById('blur').value = 0;
+  document.getElementById('bright-val').textContent = '100%';
+  document.getElementById('contrast-val').textContent = '100%';
+  document.getElementById('saturate-val').textContent = '100%';
+  document.getElementById('hue-val').textContent = '0°';
+  document.getElementById('blur-val').textContent = '0px';
+  state.filter = 'none';
+  document.querySelectorAll('.filter-item').forEach((i, idx) => {
+    i.classList.toggle('active', idx === 0);
+  });
+  updateVideoFilter();
+}
+
+// ─────────────────────────────────────────
+//  TEXT OVERLAY
+// ─────────────────────────────────────────
+document.getElementById('font-size').addEventListener('input', e => {
+  document.getElementById('font-size-val').textContent = e.target.value + 'px';
+  updateTextOverlay();
+});
+
+document.getElementById('text-color').addEventListener('input', updateTextOverlay);
+document.getElementById('text-bg').addEventListener('input', updateTextOverlay);
+document.getElementById('text-bg-opacity').addEventListener('input', updateTextOverlay);
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function applyTextOverlay() {
+  const txt = document.getElementById('overlay-text').value.trim();
+  const overlay = document.getElementById('text-overlay');
+  if (!txt) { overlay.style.display = 'none'; return; }
+  state.textContent = txt;
+  overlay.textContent = txt;
+  overlay.style.display = 'block';
+  updateTextOverlay();
+}
+
+function updateTextOverlay() {
+  const overlay = document.getElementById('text-overlay');
+  if (overlay.style.display === 'none') return;
+  const size = document.getElementById('font-size').value;
+  const color = document.getElementById('text-color').value;
+  const bg = document.getElementById('text-bg').value;
+  const opacity = document.getElementById('text-bg-opacity').value / 100;
+  overlay.style.fontSize = size + 'px';
+  overlay.style.color = color;
+  overlay.style.backgroundColor = hexToRgba(bg, opacity);
+}
+
+function removeTextOverlay() {
+  document.getElementById('text-overlay').style.display = 'none';
+  state.textContent = '';
+}
+
+// Make text overlay draggable
+const textOvl = document.getElementById('text-overlay');
+let dragging = false, ox = 0, oy = 0;
+
+textOvl.addEventListener('mousedown', e => {
+  dragging = true;
+  const rect = textOvl.getBoundingClientRect();
+  ox = e.clientX - rect.left;
+  oy = e.clientY - rect.top;
+  textOvl.style.transform = 'none';
+  e.preventDefault();
+});
+
+document.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  const wrapper = document.getElementById('video-wrapper').getBoundingClientRect();
+  let x = e.clientX - wrapper.left - ox;
+  let y = e.clientY - wrapper.top - oy;
+  textOvl.style.left = Math.max(0, x) + 'px';
+  textOvl.style.top = Math.max(0, y) + 'px';
+});
+
+document.addEventListener('mouseup', () => { dragging = false; });
+
+// ─────────────────────────────────────────
+//  EXPORT / DOWNLOAD
+// ─────────────────────────────────────────
+async function exportVideo() {
+  if (!video.src) return;
+
+  const progress = document.getElementById('export-progress');
+  const bar = document.getElementById('progress-bar');
+  const label = document.getElementById('progress-label');
+  progress.classList.add('visible');
+
+  try {
+    // Try MediaRecorder capture approach
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 360;
+    const ctx = canvas.getContext('2d');
+
+    const format = document.getElementById('format-select').value;
+    const quality = document.getElementById('quality-select').value;
+    const mimeType = format === 'webm' ? 'video/webm;codecs=vp9' : 'video/webm';
+
+    let bitsPerSecond = quality === 'high' ? 4000000 : quality === 'medium' ? 2000000 : 800000;
+
+    const stream = canvas.captureStream(30);
+
+    // Add audio
+    let audioStream = null;
+    try {
+      const audioCtx = new AudioContext();
+      const src = audioCtx.createMediaElementSource(video);
+      const gainNode = audioCtx.createGain();
+      gainNode.gain.value = state.isMuted ? 0 : state.volume;
+      src.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      const dest = audioCtx.createMediaStreamDestination();
+      gainNode.connect(dest);
+      audioStream = dest.stream;
+      dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
+    } catch(e) { /* audio capture not supported — continue without */ }
+
+    const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: bitsPerSecond });
+    const chunks = [];
+    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+    const filterMap = {
+      'none': '',
+      'grayscale': 'grayscale(100%)',
+      'sepia': 'sepia(80%)',
+      'invert': 'invert(100%)',
+      'saturate': 'saturate(200%)',
+      'vintage': 'sepia(40%) contrast(1.1) brightness(0.95)',
+      'cool': 'hue-rotate(30deg) saturate(120%)',
+      'warm': 'hue-rotate(-15deg) saturate(130%) brightness(1.05)'
+    };
+
+    recorder.start(100);
+    video.currentTime = state.trimStart;
+    video.playbackRate = state.playbackRate;
+
+    const totalDur = state.trimEnd - state.trimStart;
+    let startTS = null;
+
+    await new Promise((resolve, reject) => {
+      const rafLoop = (ts) => {
+        if (!startTS) startTS = ts;
+        const elapsed = (ts - startTS) / 1000 * state.playbackRate;
+        const pct = Math.min(elapsed / totalDur, 1);
+        bar.style.width = (pct * 100) + '%';
+        label.textContent = 'تم: ' + Math.round(pct * 100) + '%';
+
+        if (video.currentTime >= state.trimEnd - 0.05 || pct >= 1) {
+          video.pause();
+          recorder.stop();
+          resolve();
+          return;
+        }
+
+        // Apply filter + adjustments via canvas
+        ctx.save();
+        const filterStr = (filterMap[state.filter] || '') + ` brightness(${state.brightness/100}) contrast(${state.contrast/100}) saturate(${state.saturate/100}) hue-rotate(${state.hue}deg) blur(${state.blur}px)`;
+        ctx.filter = filterStr.trim();
+
+        // Handle flip/rotate
+        ctx.translate(canvas.width/2, canvas.height/2);
+        ctx.rotate(state.rotation * Math.PI / 180);
+        ctx.scale(state.flipH ? -1 : 1, state.flipV ? -1 : 1);
+        ctx.drawImage(video, -canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
+        ctx.restore();
+
+        // Draw text overlay
+        if (state.textContent) {
+          const size = parseInt(document.getElementById('font-size').value);
+          const color = document.getElementById('text-color').value;
+          const bg = document.getElementById('text-bg').value;
+          const op = document.getElementById('text-bg-opacity').value / 100;
+          ctx.font = `bold ${size}px Cairo, sans-serif`;
+          const tw = ctx.measureText(state.textContent).width;
+          const tx = canvas.width/2 - tw/2;
+          const ty = size + 20;
+          ctx.fillStyle = hexToRgba(bg, op);
+          ctx.fillRect(tx - 10, ty - size, tw + 20, size + 10);
+          ctx.fillStyle = color;
+          ctx.fillText(state.textContent, tx, ty);
+        }
+
+        requestAnimationFrame(rafLoop);
+      };
+
+      video.play().then(() => requestAnimationFrame(rafLoop)).catch(reject);
+    });
+
+    await new Promise(r => setTimeout(r, 300));
+
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const ext = format === 'webm' ? 'webm' : 'webm'; // browsers record in webm
+      a.href = url;
+      a.download = 'videoforge-export.' + ext;
+      a.click();
+      URL.revokeObjectURL(url);
+      progress.classList.remove('visible');
+      bar.style.width = '0%';
+    };
+
+  } catch (err) {
+    console.error(err);
+    progress.classList.remove('visible');
+    // Fallback: direct download original
+    fallbackDownload();
+  }
+}
+
+function fallbackDownload() {
+  const a = document.createElement('a');
+  a.href = state.videoURL;
+  a.download = state.videoFile ? state.videoFile.name : 'video.mp4';
+  a.click();
+  document.getElementById('progress-label').textContent = '';
+}
+
+// ─────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────
+function formatTime(s) {
+  if (!s || isNaN(s)) return '0:00';
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return m + ':' + String(sec).padStart(2,'0');
+}
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (!video.src) return;
+  if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  if (e.code === 'ArrowRight') seekBy(5);
+  if (e.code === 'ArrowLeft') seekBy(-5);
+  if (e.code === 'Home') seekTo(0);
+  if (e.code === 'End') seekEnd();
+  if (e.code === 'KeyM') toggleMute();
+});
 </script>
 
 </body>
